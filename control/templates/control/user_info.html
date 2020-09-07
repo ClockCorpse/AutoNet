@@ -1,0 +1,35 @@
+{% extends 'control/base.html' %} {% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-9">
+            <div class="card account-info-wrapper">
+                <div class="card-heading text-center">
+                    <h4 class="title">User's Info</h4>
+                </div>
+                <div class="card-body">
+                    <h4>General</h4>
+                    <hr>
+                    <form class="horizontal" action="#">
+                        <div class="value">
+                            <h6>Username</h6>
+                            <div class="input-group">
+                                <input type="text" class="input-style" value="Username" readonly>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="value">
+                            <h6>Email</h6>
+                            <div class="input-group">
+                                <input type="text" class="input-style" value="Example@gmail.com" readonly>
+                            </div>
+                        </div>
+                    </form>
+                    <br><br>
+                    <h4>Profiles</h4>
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

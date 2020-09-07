@@ -1,0 +1,44 @@
+{% extends 'control/base.html' %}{% block discover_active %}active{% endblock %} {% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-7">
+            <div class="card discover-wrapper">
+                <div class="card-heading text-center">
+                    <h4 class="title">Discover Devices</h4>
+                </div>
+                <div class="card-body">
+                    <form action="#" method="GET">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="name text-center">Target</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <input type="text" class="input-style" name="Target" placeholder="0.0.0.0">
+                                </div>
+                                <span class="text-danger small">warning</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name text-center">Profile</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <select class="select-style">
+                                        <option class="option-style">admin</option>
+                                        <option class="option-style">admin</option>
+                                        <option class="option-style">admin</option>
+                                    </select>
+                                </div>
+                                <span class="text-danger small">warning</span>
+                            </div>
+                        </div>
+                        <div class="justify-content-center">
+                            <input type="button" class="btn btn-success" value="Start">
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
