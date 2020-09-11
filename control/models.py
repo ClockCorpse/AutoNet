@@ -10,7 +10,7 @@ class Profile(models.Model):
     profileEnablePassword = models.CharField(max_length=255)
 
     def __str__(self):
-        return User.USERNAME_FIELD + ' ' + self.pk
+        return self.profileName
 
 class Device(models.Model):
     user = models.ForeignKey(User,default=1,on_delete=models.CASCADE)

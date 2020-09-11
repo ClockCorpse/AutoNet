@@ -1,24 +1,25 @@
 body {
     background: #EEEEEE;
+    height: 100%;
+    overflow-y: scroll !important;
 }
 
 #sidebar-wrapper {
-    z-index: 1;
+    z-index: 9999;
     position: fixed;
-    width: 260px;
+    width: 250px;
     height: 100%;
     overflow-x: hidden;
     background: #2c3e50;
     border: 2px solid;
     opacity: 1;
-    left: -260px;
+    left: -250px;
     transition: 0.1s;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
 }
 
 #page-content-wrapper {
     width: 100%;
-    position: fixed;
     padding: 15px;
     transition: 0.1s;
 }
@@ -228,6 +229,7 @@ body {
 }
 
 .discover-wrapper {
+    margin-top: 75px;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.15);
@@ -250,6 +252,10 @@ body {
     font-size: 16px;
     color: #555;
     border-width: 0px;
+}
+
+.input-group input {
+    width: 270px !important;
 }
 
 .form-row {
@@ -285,6 +291,18 @@ body {
 }
 
 .account-info-wrapper {
+    margin-top: 75px;
     border-radius: 10px;
     box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.15);
+}
+
+.login-wrapper {
+    margin-top: 75px;
+    border-radius: 10px;
+}
+
+.errorlist li {
+    list-style-type: none;
+    font-size: small !important;
+    color: red !important;
 }

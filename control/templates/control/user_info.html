@@ -4,29 +4,68 @@
         <div class="col-sm-12 col-md-9">
             <div class="card account-info-wrapper">
                 <div class="card-heading text-center">
-                    <h4 class="title">User's Info</h4>
+                    <h4 class="title">Account Info</h4>
                 </div>
                 <div class="card-body">
                     <h4>General</h4>
+                    <p class="text-muted"><small>Account's basic info</small></p>
                     <hr>
                     <form class="horizontal" action="#">
                         <div class="value">
                             <h6>Username</h6>
                             <div class="input-group">
-                                <input type="text" class="input-style" value="Username" readonly>
+                                <input type="text" class="input-style" value="{{user.username}}" readonly>
                             </div>
                         </div>
                         <br>
                         <div class="value">
                             <h6>Email</h6>
                             <div class="input-group">
-                                <input type="text" class="input-style" value="Example@gmail.com" readonly>
+                                <input type="text" class="input-style" value="{{user.email}}" readonly>
                             </div>
                         </div>
                     </form>
-                    <br><br>
+                    <br>
+                    <hr><br>
                     <h4>Profiles</h4>
+                    <p class="text-muted"><small>Used to connect to devices via SSH</small></p>
                     <hr>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Username</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if allProfile %} {% for profile in allProfile %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{profile.profileName}}</td>
+                                <td>
+                                    <a href="#" class="btn btn-default btn-sm" role="button"><span class="fas fa-edit"></span>&nbsp;Edit</a>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-danger btn-sm" role="button"><span class="fas fa-trash-alt"></span>&nbsp;Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %} {% else %}
+                            <tr>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'control:add_profile' %}" class="btn btn-success"><span class="fas fa-plus-circle"></span>&nbsp;Add Profile</a>
                 </div>
             </div>
         </div>
