@@ -59,6 +59,10 @@ body {
     background: #16a085;
 }
 
+.navbar li.active {
+    background: #243342;
+}
+
 .navbar li a {
     display: block;
 }
@@ -305,4 +309,8 @@ body {
     list-style-type: none;
     font-size: small !important;
     color: red !important;
+}
+
+.password-field {
+    display: none;
 }

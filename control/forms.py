@@ -13,3 +13,9 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['profileName','profilePassword','profileEnablePassword']
+
+# class ChangePasswordForm(forms.ModelForm):
+#     class Meta:
+#         model = User
+#         fields = ['password','newPassword']
+#         widgets = {'newPassword':forms.PasswordInput}

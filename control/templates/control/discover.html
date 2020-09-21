@@ -23,9 +23,10 @@
                             <div class="value">
                                 <div class="input-group">
                                     <select class="select-style">
-                                        <option class="option-style">admin</option>
-                                        <option class="option-style">admin</option>
-                                        <option class="option-style">admin</option>
+                                        <option class="option-style">Choose a profile</option>
+                                        {% for profile in allProfiles %}
+                                        <option class="option-style">{{profile.profileName}}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 <span class="text-danger small">warning</span>

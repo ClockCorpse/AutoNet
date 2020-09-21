@@ -25,12 +25,12 @@
                 </div>
                 <!--Items-->
                 <ul class="nav navbar-nav ml-auto" style="display: block; width: 200px;">
-                    <li class="{% block login_active %}{% endblock %}" style="float: right;">
+                    <li class="{% block registration_active %}{% endblock %}" style="float: right;">
                         <a class="btn" href="{% url 'control:register' %}">
                                 REGISTER
                             </a>
                     </li>
-                    <li class="{% block registration_active %}{% endblock %}" style="float: right;">
+                    <li class="{% block login_active %}{% endblock %}" style="float: right;">
                         <a class="btn" href="{% url 'control:login' %}">
                                 LOGIN
                             </a>

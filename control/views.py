@@ -1,6 +1,8 @@
-from django.shortcuts import render,redirect,get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth import login,logout,authenticate
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, Http404, HttpResponseForbidden
+from django.contrib.auth import login,logout,authenticate,update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
 from .forms import UserForm, ProfileForm
 from django.contrib.auth.models import User
 from .models import Profile
@@ -60,7 +62,6 @@ def make_profile(request):
         if request.method == 'POST':
             # pylint: disable=no-member
             allProfile = Profile.objects.filter(user=request.user)
-            print(allProfile)
             form = ProfileForm(request.POST)
             if form.is_valid():
                 profile = form.save(commit=False)
@@ -73,12 +74,16 @@ def make_profile(request):
 def index(request):
     if not request.user.is_authenticated:
         return redirect('control:login')
-    return render(request,'control/user_info.html')
+        # pylint: disable=no-member
+    allProfile = Profile.objects.filter(user=request.user)
+    return render(request,'control/user_info.html',{'allProfile':allProfile})
 
-def discover(request):
+def discover_form(request):
     if not request.user.is_authenticated:
        return redirect('control:login')
-    return render(request,'control/discover.html')
+    # pylint: disable=no-member
+    allProfiles = Profile.objects.filter(user=request.user)
+    return render(request,'control/discover.html',{'allProfiles':allProfiles})
 
 def account_info(request):
     if not request.user.is_authenticated:
@@ -86,3 +91,46 @@ def account_info(request):
     # pylint: disable=no-member
     allProfile = Profile.objects.filter(user=request.user)
     return render(request,'control/user_info.html',{'allProfile':allProfile})
+
+def delete_profile(request, profile_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    # pylint: disable=no-member
+    profile = Profile.objects.get(pk=profile_id)
+    profile.delete()
+    return redirect('control:account_info')
+
+def update_profile_form(request, profile_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    # pylint: disable=no-member
+    profile = get_object_or_404(Profile, pk=profile_id)
+    if profile.user == request.user:
+        return render(request,'control/update_profile.html',{'profile':profile})
+    return HttpResponseForbidden('<h1>Access denied</h1>')
+
+def change_password(request):
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)  # Important!
+        return redirect('control:account_info')
+    else:
+        # pylint: disable=no-member
+        allProfiles = Profile.objects.filter(user=request.user)
+        return render(request,'control/user_info.html',{'form':form,'allProfile':allProfiles})
+
+
+def change_profile(request,profile_id): 
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    else:
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            profile = get_object_or_404(Profile, pk=profile_id)
+            profile.profileName = form.cleaned_data['profileName']
+            profile.profilePassword = form.cleaned_data['profilePassword']
+            profile.profileEnablePassword = form.cleaned_data['profileEnablePassword']
+            profile.save()
+            return redirect('control:account_info')
+    return redirect('control:account_info')
