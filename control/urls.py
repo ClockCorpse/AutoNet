@@ -5,7 +5,9 @@ app_name = 'control'
 
 urlpatterns =[
     path('', views.index, name='index'),
-    path('discover/',views.discover_form, name='discover'),
+    path('discover_devices/',views.discover_form, name='discover_devices'),
+    path('discover/',views.discover,name='discover'),
+    path('add_discovered',views.add_discovered,name='add_discovered'),
     path('account_info/',views.account_info,name='account_info'),
     path('login/',views.login_user,name='login'),
     path('logout/',views.logout_user,name='logout'),

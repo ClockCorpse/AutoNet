@@ -11,7 +11,7 @@ body {
     height: 100%;
     overflow-x: hidden;
     background: #2c3e50;
-    border: 2px solid;
+    border-right: 2px solid;
     opacity: 1;
     left: -250px;
     transition: 0.1s;
@@ -228,7 +228,7 @@ body {
 }
 
 .card-body {
-    padding: 52px 80px;
+    padding: 52px 50px;
     padding-bottom: 73px;
 }
 

@@ -5,8 +5,11 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from .forms import UserForm, ProfileForm
 from django.contrib.auth.models import User
-from .models import Profile
+from .models import Profile,Device,DeviceTemp
+from .configCalls import device
 from django import forms
+import json
+from django.core.validators import validate_ipv46_address, RegexValidator
 # Create your views here.
 
 def login_user(request):
@@ -84,6 +87,64 @@ def discover_form(request):
     # pylint: disable=no-member
     allProfiles = Profile.objects.filter(user=request.user)
     return render(request,'control/discover.html',{'allProfiles':allProfiles})
+
+def discover(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+        # pylint: disable=no-member
+    form = request.POST
+    try:
+        validate_ipv46_address(form['Target'])
+        profile = get_object_or_404(Profile,pk=form['profile'])
+        DeviceTemp.objects.all().delete()
+        target = device(form['Target'],22,profile.profileName,profile.profilePassword)
+        try:
+            deviceList_output = target.discover()
+            for each in deviceList_output:
+                hostname = each['destination_host'] = each['destination_host'].split('.')[0]
+                deviceType = ''
+                if each['software_version'].split(',')[0] == 'Cisco IOS Software':
+                    deviceType = 'cisco_ios'
+                a = DeviceTemp(hostname=hostname,managementIP=each['management_ip'],localPort=each['local_port'],remotePort=each['remote_port'],platform = each['platform'],softwareVersion=each['software_version'],deviceType=deviceType)
+                a.save()
+            # print(json.dumps(deviceList_output,indent=4))
+            deviceList = DeviceTemp.objects.filter(user=request.user)
+            allProfiles = Profile.objects.filter(user=request.user)
+            context = {'deviceList':deviceList,
+                        'allProfiles':allProfiles}
+            return render(request,'control/discover.html',context=context)
+        except:
+            allProfiles = Profile.objects.filter(user=request.user)
+            context = {'allProfiles':allProfiles,
+                        'timeout_error_message':'Timeout !'}
+            return render(request,'control/discover.html',context=context)
+    except ValueError as e:
+        allProfiles = Profile.objects.filter(user=request.user)
+        context = {'allProfiles':allProfiles,
+                    'profile_error_message':'Choose a profile'}
+        return render(request,'control/discover.html',context=context)
+    except Exception as e:
+        allProfiles = Profile.objects.filter(user=request.user)
+        print(e)
+        context = {'allProfiles':allProfiles,
+                    'IP_error_message':'Enter a valid IP address'}
+        return render(request,'control/discover.html',context=context)
+    
+
+def add_discovered(request):
+    form = request.POST
+    device_temp = get_object_or_404(DeviceTemp,pk=form['device_id'])
+    device = Device(user=request.user,hostname=device_temp.hostname,managementIP=device_temp.managementIP,localPort=device_temp.localPort,remotePort=device_temp.remotePort,platform =device_temp.platform,softwareVersion=device_temp.softwareVersion,deviceType=device_temp.deviceType)
+    device.save()
+    device_temp.delete()
+    # pylint: disable=no-member
+    allProfiles = Profile.objects.filter(user=request.user)
+    deviceList = DeviceTemp.objects.filter(user=request.user)
+
+    print(device)
+    context = {'deviceList':deviceList,
+                'allProfiles':allProfiles}
+    return render(request,'control/discover.html',context=context)
 
 def account_info(request):
     if not request.user.is_authenticated:
