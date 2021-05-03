@@ -1,0 +1,65 @@
+{% extends 'control/base.html' %}{% load static %}{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-6">
+            <div class="card discover-wrapper">
+                <div class="card-heading text-center">
+                    <h4 class="title">Domain promotion</h4>
+                </div>
+                <div class="card-body">
+                    <form class="horizontal" action="{% url 'control:promoteDomain' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="value">
+                            <h6>Domain Name</h6>
+                            <div class="input-group">
+                                <input type="text" class="input-style" name="domain_name" value="">
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Netbios Name</h6>
+                            <div class="input-group">
+                                <input type="text" class="input-style" name="net_name" value="">
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Safe Mode Password</h6>
+                            <div class="input-group">
+                                <input type="password" class="input-style" name="safe_pass" value="">
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Host</h6>
+                            <div class="input-group">
+                                <input type="text" class="input-style" name="host" value="">
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Credential</h6>
+                            <select class="select-style" name="profile">
+                                <option class="option-style">Choose a profile</option>
+                                {% for profile in allProfiles %}
+                                <option class="option-style" value="{{profile.id}}">{{profile.profileName}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                        </div>
+                        <div class=" form-row justify-content-center">
+                            <input type="submit" class="btn btn-success" style="width: 100px;" value="Run">
+                        </div>
+                    </form>
+                    {% if message %}
+                    <div class="alert alert-success" role="alert">
+                        Đang tiến hành thăng domain. Server sẽ được khởi động lại trong ít phút.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'control/base.html' %}{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-9">
+            <div class="card discover-wrapper" style="overflow-x: scroll;">
+                <div class="card-heading text-center">
+                    <h4 class="title">Domain Users</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div></div>
+                        <div>
+                            <form action="{% url 'control:findUser' %}" method="GET">
+                                {% csrf_token %}
+                                <div class="sm-form mt-0">
+                                    <div class="input-group">
+                                        <input class="form-control" type="text" placeholder="Search" aria-label="Search" name="q" value="">
+                                        <div class="input-group-btn">
+                                            <button type="submit" class="btn btn-secondary"><i class="fas fa-search"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <br>
+                    <table class="table">
+                        <thead>
+                            <th>CN</th>
+                            <th>OU</th>
+                            <th>DC</th>
+                            <th>Enabled</th>
+                            <th></th>
+                            <th></th>
+                        </thead>
+                        {% if allUser %}
+                        {% for DSuser in allUser %}
+                        <tr>
+                            <td><strong>{{DSuser.cn}}</strong></td>
+                            <td>{{DSuser.ou}}</td>
+                            <td>{{DSuser.dc}}</td>
+                            <td>{{DSuser.enabled}}</td>
+                            <td>
+                                <a href="{% url 'control:updateDSUser' DSuser.id %}" class="btn btn-default btn-sm" role="button"><span
+                                        class="fas fa-edit"></span>&nbsp;Edit</a>
+                            </td>
+                            <td>
+                                <form action="{% url 'control:deleteUser' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{DSuser.id}}">
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>&nbsp;&nbsp;Delete</a>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                    <button class="btn btn-success" data-toggle="modal" data-target="#addUserModal"><span
+                        class="fas fa-plus-circle"></span>&nbsp;Add User</button>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#addCSVModal"><span
+                        class="fas fa-file-csv"></span>&nbsp;Add CSV</button>
+                    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">New Domain User</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <form action="{% url 'control:createUserPage' %}"method="POST">
+                                    {% csrf_token %}
+                                    <div class="modal-body" style="padding:40px">
+                                        <div class="value">
+                                            <h6>Computer Name</h6>
+                                            <div class="input-group">
+                                                <input type="text" name="cn" class="input-style" name="new_IP" value="">
+                                            </div>
+                                            <br>
+                                        </div>
+                                        <div class="value">
+                                            <h6>Organizational Unit</h6>
+                                            <select name="ou" class="select-style">
+                                                <option class="option-style">Select OU</option>
+                                                {% for ou in ouList %}
+                                                <option class="option-style" value="{{ou}}">{{ou}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <br>
+                                        <div class="value">
+                                            <h6>Domain</h6>
+                                            <div class="input-group">
+                                                <input type="text" class="input-style" name="dc" value="{{domain}}" readonly>
+                                            </div>
+                                            <br>
+                                        </div>
+                                        <div class="value">
+                                            <h6>Password</h6>
+                                            <div class="input-group">
+                                                <input type="password" name="password" class="input-style" name="new_IP" value="">
+                                            </div>
+                                            <br>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Add</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="addCSVModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Upload CSV</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                
+                                <form class="horizontal" action="{% url 'control:addFile' %}" method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="modal-body" style="padding:40px">
+                                    <div class="value">
+                                        <h6>Add multiple users with CSV</h6><br>
+                                        <div class="input-group">
+                                            <input type="file" class="form-control-file" name="file" value="">
+                                        </div>
+                                        <br>
+                                    </div>
+                                    {% if CSV_error_message %}
+                                        <p class="small text-danger">{{CSV_error_message}}</p>
+                                    {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Add</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

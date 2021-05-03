@@ -1,0 +1,30 @@
+{% extends 'control/base.html' %}{% load static %}{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-5">
+            <div class="card discover-wrapper">
+                <div class="card-heading text-center">
+                    <h4 class="title">Create OU</h4>
+                </div>
+                <div class="card-body">
+                    <form class="horizontal" action="{% url 'control:addOU' %}" method="POST">
+                        {% csrf_token %}
+                        <h6>Name</h6>
+                        <div class="input-group">
+                            <input type="text" name="ou" class="input-style" value="">
+                        </div>
+                        <br>
+                        <h6>Domain controler</h6>
+                        <h7>{{domain}}</h7>
+                        <br>
+                        <div class=" form-row justify-content-center">
+                            <input type="submit" class="btn btn-success" style="width: 100px;" value="Create">
+                            {% if error_message %}<span class="text-small text-warning">{{error_message}}</span>{% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'control/base.html' %}{% block discover_active %}active{% endblock %} {% block body %} {% if timeout_error_message %}
+<script>
+    alert("{{timeout_error_message}}")
+</script>
+{% endif %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-9">
+            <div class="card discover-wrapper" style="overflow-x: scroll;">
+                <div class="card-heading text-center">
+                    <h4 class="title">Discover Devices</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'control:discover' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="name text-center">Target</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <input type="text" class="input-style" name="Target" placeholder="0.0.0.0">
+                                </div>
+                                {% if IP_error_message %}
+                                <span class="text-danger small">{{IP_error_message}}</span> {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="name text-center">Profile</div>
+                            <div class="value">
+                                <div class="input-group">
+                                    <select class="select-style" name="profile">
+                                        <option class="option-style">Choose a profile</option>
+                                        {% for profile in allProfiles %}
+                                        <option class="option-style" value="{{profile.id}}">{{profile.profileName}}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% if profile_error_message %}
+                                <span class="text-danger small">{{profile_error_message}}</span> {% endif %}
+                            </div>
+                        </div>
+                        <br>
+                        <div class=" form-row justify-content-center">
+                            <input type="submit" class="btn btn-success" style="width: 100px;" value="Start">
+                        </div>
+                    </form>
+                    {% if deviceList %}
+                    <hr>
+                    <table class="table table-striped">
+                        <thead>
+                            <th scope="col">Hostname</th>
+                            <th scope="col">Mgmt IP</th>
+                            <th scope="col">PLatform</th>
+                            <th scope="col">Remote port</th>
+                            <th scope="col">Local port</th>
+                            <th scope="col">Device type</th>
+                            <th scope="col"></th>
+                        </thead>
+                        {% for device in deviceList%}
+                        <tr>
+                            <td>{{device.hostname}}</td>
+                            <td>{{device.managementIP}}</td>
+                            <td>{{device.platform}}</td>
+                            <td>{{device.remotePort}}</td>
+                            <td>{{device.localPort}}</td>
+                            <td>{{device.softwareVersion}}</td>
+                            <td>
+                                <form action="{% url 'control:add_discovered' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="device_id" value="{{device.id}}">
+                                    <button type="submit" class="btn btn-primary btn-sm"><span
+                                            class="fas fa-plus"></span>&nbsp;Add Device</a>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %} {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'control/base.html' %}{% load static %}{% block body %}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-7">
+            <div class="alert alert-danger" style="margin-top: 75px;" role="alert">
+                Server chưa được thăng domain. Click vào <a href="{% url 'control:promoteDomain' %}">đây</a> để bắt đầu thăng.
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

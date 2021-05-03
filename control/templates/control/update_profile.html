@@ -1,0 +1,61 @@
+{% extends 'control/base.html' %}{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-5">
+            <div class="card account-info-wrapper">
+                <div class="card-heading text-center">
+                    <h4 class="title">Update profile</h4>
+                </div>
+                <div class="card-body">
+                    <form class="form-horizontal" action="{% url 'control:update_profile' profile.id %}" method="POST">
+                        {% csrf_token %}
+                        <fieldset>
+                            <div class="control-group">
+                                <!-- Profile name -->
+                                <label class="control-label" for="username">Profile name (user)</label>
+                                <div class="controls">
+                                    <input type="text" name="profileName" placeholder="" class="form-control" value="{{profile.profileName}}">
+                                    <p class="small text-danger">{{form.profileName.errors}}</p>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <!-- Password-->
+                                <label class="control-label" for="password">Password</label>
+                                <div class="controls">
+                                    <input type="password" name="profilePassword" placeholder="" class="form-control">
+                                    <p class="small text-danger">{{form.profilePassword.errors}}</p>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <!-- Enable -->
+                                <label class="control-label" for="email">Enable password</label>
+                                <div class="controls">
+                                    <input type="password" name="profileEnablePassword" placeholder="" class="form-control">
+                                    <p class="small text-danger">{{form.profileEnablePassword.errors}}</p>
+                                </div>
+                            </div>
+
+                            <fieldset class="form-group">
+                                <!-- Make Primary -->
+                                <div class="controls">
+                                    <input type="checkbox" name="primary" value="True">
+                                    <label for="primary" class="form-check-label">Primary</label>
+                                </div>
+                            </fieldset>
+
+                            <div class="control-group">
+                                <!-- Button -->
+                                <div class="controls">
+                                    <button class="btn btn-success" type="submit"><span class="fas fa-edit"></span>&nbsp;Change</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

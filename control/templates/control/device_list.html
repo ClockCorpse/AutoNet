@@ -1,0 +1,90 @@
+{% extends 'control/base.html' %}{% block deviceList_active %}active{% endblock %}{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-9">
+            <div class="card account-info-wrapper" style="overflow-x: scroll !important;">
+                <div class="card-heading text-center">
+                    <h4 class="title">Device List</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <th>Name</th>
+                            <th>Management IP</th>
+                            <th>Status</th>
+                            <th>Capabilities</th>
+                            <th></th>
+                        </thead>
+                        {% for device in allDevices %}
+                        <tr>
+                            <td><a href="{% url 'control:device_detail' device.id %}">{{device.hostname}}</a></td>
+                            <td>{{device.managementIP}}</td>
+                            <td>{{device.status}}</td>
+                            <td>{{device.capabilities}}</td>
+                            <td>
+                                <form action="{% url 'control:remove_device' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input name="device_id" value="{{device.id}}" type="hidden">
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>&nbsp;&nbsp;Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="card-footer" style="padding: 10px; padding-left: 50px;">
+                    <button class="btn btn-success" data-toggle="modal" data-target="#addUserModal"><span
+                        class="fas fa-plus-circle"></span>&nbsp;Apply configuation</button>
+                </div>
+                <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Apply Configuration</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <form action="{% url 'control:manual_config_form' %}"method="POST">
+                                {% csrf_token %}
+                                <div class="modal-body" style="padding:40px">
+                                    <textarea class="form-control" rows="3" placeholder="Your configuration here" name="config" style="margin-bottom: 20px;"></textarea>
+                                    <div class="input-group">
+                                        <select class="select-style" name="profile">
+                                            <option class="option-style">Choose a profile</option>
+                                            {% for profile in allProfiles %}
+                                            <option class="option-style" value="{{profile.id}}">{{profile.profileName}}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-check" style="margin:20px; background-color: #fefefe; border: 1px solid #cdcdcd; overflow-y: scroll;height: 200px;">
+                                        <div style="padding: 5px; margin: 5px; margin-left: 10px;">
+                                            <input class="form-check-input" type="checkbox" value="" onclick="toggle(this)" >
+                                            <label class="form-check-label" for="">
+                                                Select all
+                                            </label>
+                                        </div>
+                                        {% for device in allDevices %}
+                                        <div style="padding: 5px; margin: 5px; margin-left: 10px;">
+                                        <input class="form-check-input" type="checkbox" value="{{device.id}}" id="device#{{forloop.counter}}" name="device">
+                                        <label class="form-check-label" for="device#{{forloop.counter}}">
+                                            <strong>{{device.hostname}}</strong>
+                                        </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-success"><i class="fas fa-plus-circle"></i>&nbsp;&nbsp;Add</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

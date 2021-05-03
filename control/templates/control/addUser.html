@@ -1,0 +1,54 @@
+{% extends 'control/base.html' %}{% load static %}{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-6">
+            <div class="card discover-wrapper" style="overflow-x: scroll;">
+                <div class="card-heading text-center">
+                    <h4 class="title">TẠO USER</h4>
+                </div>
+                <div class="card-body">
+                    <form class="horizontal" action="{% url 'control:createUserPage' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="value">
+                            <h6>Computer name (cn)</h6>
+                            <div class="input-group">
+                                <input type="text" name="cn" class="input-style" value="">
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Organizational Unit (ou)</h6>
+                            <div class="input-group">
+                                <select name="ou" class="input-style">
+                                    <option value="">-- Chon 1 ou --</option>
+                                    {% for ou in ouList %}
+                                    <option value="{{ou}}">{{ou}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Domain Controller (dc)</h6>
+                            <div class="input-group">
+                                <input type="text" name="dc" class="input-style" value="{{domain}}" readonly>
+                            </div>
+                            <br>
+                        </div>
+                        <div class="value">
+                            <h6>Password</h6>
+                            <div class="input-group">
+                                <input type="password" name="password" class="input-style" value="">
+                            </div>
+                            <br>
+                        </div>
+                        <div class=" form-row justify-content-center">
+                            <input type="submit" class="btn btn-success" style="width: 100px;" value="Thêm User">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
