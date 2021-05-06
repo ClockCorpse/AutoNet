@@ -1,21 +1,84 @@
-{% extends 'control/base.html' %}{% load static %}{% block body %}
+{% extends 'control/base.html' %}{% block discover_active %}active{% endblock %} {% block body %}
 <div class="container-fluid">
-    <div class="row justify-content-center no-gutters">
-        <div class="card discover-wrapper" style="width:70%;padding: 10px;">
-            <div class="row no-gutters">
-                <div class="col-sm-3" style="padding:20px; border-right:">
-                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                        <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">VLAN</a>
-                        <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Profile</a>
-                        <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>
-                        <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
-                      </div>
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-9">
+            <div class="card discover-wrapper" style="overflow-x: scroll;">
+                <div class="card-heading text-center">
+                    <h4 class="title">{{user.username}}'s Configurations</h4>
                 </div>
-                <div class="col-sm-8">
-                    <div class="card-body">
-                        <h5 class="card-title">Suresh Dasari</h5>
-                        <p class="card-text">Suresh Dasari is a founder and technical lead developer in tutlane.</p>
-                        <a href="#" class="btn btn-primary">View Profile</a>
+                <div class="card-body">
+                    <div class="col-md-12 text-right">
+                        <button class="btn btn-success" data-toggle="modal" data-target="#uploadConfig"><i
+                                class="fas fa-upload"></i>&nbsp; Upload Config
+                        </button>
+                        <div class="modal fade" id="uploadConfig" tabindex="-1" role="dialog"
+                             aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Upload your configuration</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form action="{% url 'control:create_config' %}" method="POST"
+                                          enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <div class="input-group">
+                                                <input type="file" class="form-control-file" name="config_file"
+                                                       value="">
+                                            </div>
+                                            <div class="value" style="margin-top:20px">
+                                                <div class="input-group">
+                                                    <input type="text" name="description" class="input-style" value=""
+                                                           placeholder="Description">
+                                                    {% if Error %}
+                                                    <div class="value" style="margin-top:20px">
+                                                        <div class="input-group">
+                                                            <span class="text-danger small">{{Error}}</span>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                            </button>
+                                            <button type="submit" class="btn btn-success"><i class="fas fa-upload"></i>&nbsp;&nbsp;Upload
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <form method="post" action="#">
+                            {% csrf_token %}
+                        </form>
+                    </div>
+                    <div class="sub-div" style="height:400px ; overflow-y:scroll">
+                        <table class="table">
+                            <thead>
+                            <th>Name</th>
+                            <th>Date Added</th>
+                            <th>Description</th>
+                            <th></th>
+                            </thead>
+                            <tbody>
+                            {% for file in configList %}
+                            <tr>
+                                <td><i class="fas fa-file-alt" style="color:#0275d8"></i>&nbsp;&nbsp;<a href="{{file.configPath.url}}" download="">{{file.fileName}}</a>
+                                </td>
+                                <td>{{file.dateAdded}}</td>
+                                <td>{{file.description}}</td>
+                                <td>
+                                    <button class="btn btn-danger"><i class="fas fa-trash"></i>&nbsp; Delete</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

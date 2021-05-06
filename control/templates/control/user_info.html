@@ -16,6 +16,11 @@
                                 <h6>Username</h6>
                                 <div class="input-group">
                                     <input type="text" class="input-style" value="{{user.username}}" readonly>
+                                    <div>
+                                        {% if IP_error_message %}
+                                        <span class="text-danger small">{{IP_error_message}}</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <br>
                             </div>
@@ -71,51 +76,53 @@
                         </div>
                     </fieldset>
                     <br>
-                    <hr><br>
+                    <hr>
+                    <br>
                     <h4>Profiles</h4>
                     <p class="text-muted"><small>Use to connect to devices via SSH</small></p>
                     <hr>
                     <table class="table">
                         <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Username</th>
-                                <th>Primary</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
+                        <tr>
+                            <th>No.</th>
+                            <th>Username</th>
+                            <th>Primary</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {% if allProfile %} {% for profile in allProfile %}
-                            <tr>
-                                <td>{{forloop.counter}}</td>
-                                <td>{{profile.profileName}}</td>
-                                <td>{% if profile.primary == True %}Primary{% endif %}</td>
-                                <td>
-                                    <a href="{% url 'control:update_profile_form' profile.id %}" class="btn btn-default btn-sm" role="button"><span
-                                            class="fas fa-edit"></span>&nbsp;Edit</a>
-                                </td>
-                                <td>
-                                    <form action="{% url 'control:delete_profile' profile.id %}" method="POST">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="profile_id" value="{{profile.id}}">
-                                        <button type="submit" class="btn btn-danger btn-sm"><span
-                                                class="fas fa-trash-alt"></span>&nbsp;Delete</a>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %} {% else %}
-                            <tr>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>
-                                    -
-                                </td>
-                                <td>
-                                    -
-                                </td>
-                            </tr>
-                            {% endif %}
+                        {% if allProfile %} {% for profile in allProfile %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{profile.profileName}}</td>
+                            <td>{% if profile.primary == True %}Primary{% endif %}</td>
+                            <td>
+                                <a href="{% url 'control:update_profile_form' profile.id %}"
+                                   class="btn btn-default btn-sm" role="button"><span
+                                        class="fas fa-edit"></span>&nbsp;Edit</a>
+                            </td>
+                            <td>
+                                <form action="{% url 'control:delete_profile' profile.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="profile_id" value="{{profile.id}}">
+                                    <button type="submit" class="btn btn-danger btn-sm"><span
+                                            class="fas fa-trash-alt"></span>&nbsp;Delete</a>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %} {% else %}
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>
+                                -
+                            </td>
+                            <td>
+                                -
+                            </td>
+                        </tr>
+                        {% endif %}
                         </tbody>
                     </table>
                     <a href="{% url 'control:add_profile' %}" class="btn btn-success"><span

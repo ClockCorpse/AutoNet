@@ -1,6 +1,7 @@
 {% extends 'control/base.html' %}{% block discover_active %}active{% endblock %} {% block body %} {% if timeout_error_message %}
 <script>
     alert("{{timeout_error_message}}")
+
 </script>
 {% endif %}
 <div class="container-fluid">
@@ -21,7 +22,7 @@
                                 </div>
                                 {% if IP_error_message %}
                                 <span class="text-danger small">{{IP_error_message}}</span> {% endif %}
-                            </div>
+                                </div>
                         </div>
                         <div class="form-row">
                             <div class="name text-center">Profile</div>
@@ -48,13 +49,13 @@
                     <hr>
                     <table class="table table-striped">
                         <thead>
-                            <th scope="col">Hostname</th>
-                            <th scope="col">Mgmt IP</th>
-                            <th scope="col">PLatform</th>
-                            <th scope="col">Remote port</th>
-                            <th scope="col">Local port</th>
-                            <th scope="col">Device type</th>
-                            <th scope="col"></th>
+                        <th scope="col">Hostname</th>
+                        <th scope="col">Mgmt IP</th>
+                        <th scope="col">PLatform</th>
+                        <th scope="col">Remote port</th>
+                        <th scope="col">Local port</th>
+                        <th scope="col">Device type</th>
+                        <th scope="col"></th>
                         </thead>
                         {% for device in deviceList%}
                         <tr>
