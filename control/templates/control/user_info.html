@@ -78,55 +78,159 @@
                     <br>
                     <hr>
                     <br>
-                    <h4>Profiles</h4>
+                    <a data-toggle="collapse" href="#profile-collapse"><h4>Profiles</h4></a>
                     <p class="text-muted"><small>Use to connect to devices via SSH</small></p>
                     <hr>
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Username</th>
-                            <th>Primary</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% if allProfile %} {% for profile in allProfile %}
-                        <tr>
-                            <td>{{forloop.counter}}</td>
-                            <td>{{profile.profileName}}</td>
-                            <td>{% if profile.primary == True %}Primary{% endif %}</td>
-                            <td>
-                                <a href="{% url 'control:update_profile_form' profile.id %}"
-                                   class="btn btn-default btn-sm" role="button"><span
-                                        class="fas fa-edit"></span>&nbsp;Edit</a>
-                            </td>
-                            <td>
-                                <form action="{% url 'control:delete_profile' profile.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="profile_id" value="{{profile.id}}">
-                                    <button type="submit" class="btn btn-danger btn-sm"><span
-                                            class="fas fa-trash-alt"></span>&nbsp;Delete</a>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %} {% else %}
-                        <tr>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>
-                                -
-                            </td>
-                            <td>
-                                -
-                            </td>
-                        </tr>
-                        {% endif %}
-                        </tbody>
-                    </table>
+                    <div class="collapse" id="profile-collapse">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Username</th>
+                                <th>Primary</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if allProfile %} {% for profile in allProfile %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{profile.profileName}}</td>
+                                <td>{% if profile.primary == True %}Primary{% endif %}</td>
+                                <td>
+                                    <a href="{% url 'control:update_profile_form' profile.id %}"
+                                       class="btn btn-default btn-sm" role="button"><span
+                                            class="fas fa-edit"></span>&nbsp;Edit</a>
+                                </td>
+                                <td>
+                                    <form action="{% url 'control:delete_profile' profile.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="profile_id" value="{{profile.id}}">
+                                        <button type="submit" class="btn btn-danger btn-sm"><span
+                                                class="fas fa-trash-alt"></span>&nbsp;Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %} {% else %}
+                            <tr>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+                                </td>
+                            </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                        <hr>
+                    </div>
+                    <a data-toggle="collapse" href="#RO-collapse"><h4>SNMP Read</h4></a>
+                    <p class="text-muted"><small>Use to connect to devices via SSH</small></p>
+                    <hr>
+                    <div class="collapse" id="RO-collapse">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Primary</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if allROString %} {% for ROString in allROString %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{ROString.name}}</td>
+                                <td>{% if ROString.primary == True %}Primary{% endif %}</td>
+                                <td>
+                                    <a href="{% url 'control:update_SNMPRead_form' ROString.id %}"
+                                       class="btn btn-default btn-sm" role="button"><span
+                                            class="fas fa-edit"></span>&nbsp;Edit</a>
+                                </td>
+                                <td>
+                                    <form action="{% url 'control:delete_ROString' ROString.id %}" method="GET">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm"><span
+                                                class="fas fa-trash-alt"></span>&nbsp;Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %} {% else %}
+                            <tr>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+                                </td>
+                            </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                        <hr>
+                    </div>
+                    <a data-toggle="collapse" href="#RW-collapse"><h4>SNMP Write</h4></a>
+                    <p class="text-muted"><small>Use to connect to devices via SSH</small></p>
+                    <hr>
+                    <div class="collapse" id="RW-collapse">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Primary</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if allRWString %} {% for RWString in allRWString %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{RWString.name}}</td>
+                                <td>{% if RWString.primary == True %}Primary{% endif %}</td>
+                                <td>
+                                    <a href="{% url 'control:update_SNMPWrite_form' RWString.id %}"
+                                       class="btn btn-default btn-sm" role="button"><span
+                                            class="fas fa-edit"></span>&nbsp;Edit</a>
+                                </td>
+                                <td>
+                                    <form action="{% url 'control:delete_RWString' RWString.id %}" method="GET">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm"><span
+                                                class="fas fa-trash-alt"></span>&nbsp;Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %} {% else %}
+                            <tr>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>
+                                    -
+                                </td>
+                                <td>
+                                    -
+                                </td>
+                            </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                        <hr>
+                    </div>
                     <a href="{% url 'control:add_profile' %}" class="btn btn-success"><span
-                            class="fas fa-plus-circle"></span>&nbsp;Add Profile</a>
+                            class="fas fa-plus-circle"></span>&nbsp;Add Credential</a>
                 </div>
             </div>
         </div>

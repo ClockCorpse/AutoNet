@@ -1,5 +1,5 @@
-{% extends 'control/base.html' %}{% block discover_active %}active{% endblock %} {% block body %}
-<div class="container-fluid">
+{% extends 'control/base.html' %}{% block config_list %}active{% endblock %} {% block body %}
+<div class="container-fluid" xmlns="http://www.w3.org/1999/html">
     <div class="row justify-content-center">
         <div class="col-sm-12 col-md-9">
             <div class="card discover-wrapper" style="overflow-x: scroll;">
@@ -68,12 +68,16 @@
                             <tbody>
                             {% for file in configList %}
                             <tr>
-                                <td><i class="fas fa-file-alt" style="color:#0275d8"></i>&nbsp;&nbsp;<a href="{{file.configPath.url}}" download="">{{file.fileName}}</a>
+                                <td><form method="get" action="{% url 'control:get_config' file.id %}">{% csrf_token %}<button type="submit" class="btn btn-link" ><i class="fas fa-file-alt"></i>&nbsp;&nbsp;{{file.fileName}}</button></form>
                                 </td>
                                 <td>{{file.dateAdded}}</td>
                                 <td>{{file.description}}</td>
                                 <td>
-                                    <button class="btn btn-danger"><i class="fas fa-trash"></i>&nbsp; Delete</button>
+                                    <form action="{% url 'control:delete_config' %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete" value="{{file.id}}" >
+                                        <button class="btn btn-danger" type="submit"><i class="fas fa-trash"></i>&nbsp; Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}

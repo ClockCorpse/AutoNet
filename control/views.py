@@ -3,10 +3,12 @@ from django.http import HttpResponse, Http404, HttpResponseForbidden, JsonRespon
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
-from .forms import UserForm, ProfileForm, UserExtendedForm, UserConfigForm
+from .forms import UserForm, ProfileForm, UserExtendedForm, UserConfigForm, ROCommunityStringForm, RWCommunityStringForm
 from django.contrib.auth.models import User
 from .models import Profile, Device, DeviceTemp
 from .configCalls import device
+from .device_monitor import managedDevice
+from .cpu_monitor import baseInfo, resourceMonitor
 from django import forms
 from django.conf import settings
 from django.core.validators import validate_ipv46_address, RegexValidator
@@ -15,9 +17,9 @@ from django.core import serializers
 import json
 from .models import DSUser
 from . import adduser
-from control.models import ExtendedUser, UserConfig
+from control.models import ExtendedUser, UserConfig, ROCommunityString, RWCommunityString
 from django.db.models import Q
-import csv, io, os, pathlib, subprocess, sys, os, fabric, paramiko, fsutil
+import csv, io, os, pathlib, subprocess, sys, os, fabric, paramiko, fsutil, psutil, concurrent.futures, time
 from datetime import date
 from zipfile import ZipFile
 import _thread
@@ -36,12 +38,7 @@ def login_user(request):
         if user is not None:
             if user.is_active:  # Check if user is not disabled(banned)
                 login(request, user)
-                allProfile = Profile.objects.filter(
-                    user=request.user)  # Get all the user's profile and return them for render
-                return render(request, 'control/user_info.html', {'allProfile': allProfile})
-            else:
-                return render(request, 'control/login.html',
-                              {'error_message': 'Account is disabled!'})  # Else notify them
+                return redirect('control:index')
         else:
             return render(request, 'control/login.html',
                           {'error_message': 'Account does not exist!'})  # Else notify them
@@ -67,14 +64,7 @@ def register(request):
                 username = form.cleaned_data['username']
                 password = form.cleaned_data['password']
                 user.set_password(password)
-                ConfigLocation = os.path.join(settings.MEDIA_ROOT, username)
-                os.mkdir(ConfigLocation)
-                ExtendedUser.objects.all()
-                newExtended = ExtendedUser(user=user, configLocation=ConfigLocation)
-                # extendedUser.user = user
-                # extendedUser.configLocation = ConfigLocation
                 user.save()  # Save to database
-                newExtended.save()
                 user = authenticate(username=username, password=password)  # Authenticate the user
                 if user is not None:
                     if user.is_active:
@@ -112,9 +102,8 @@ def make_profile(request):
 def index(request):
     if not request.user.is_authenticated:
         return redirect('control:login')
-        # pylint: disable=no-member
-    allProfile = Profile.objects.filter(user=request.user)
-    return render(request, 'control/user_info.html', {'allProfile': allProfile})
+    # allProfile = Profile.objects.filter(user=request.user)
+    return render(request, 'control/host_monitor.html')
 
 
 # Discover devices using CDP
@@ -199,8 +188,14 @@ def account_info(request):
     if not request.user.is_authenticated:
         return redirect('control:login')
     # pylint: disable=no-member
+    context = {}
     allProfile = Profile.objects.filter(user=request.user)
-    return render(request, 'control/user_info.html', {'allProfile': allProfile})
+    allROString = ROCommunityString.objects.filter(user=request.user)
+    allRWString = RWCommunityString.objects.filter(user=request.user)
+    context['allProfile'] = allProfile
+    context['allROString'] = allROString
+    context['allRWString'] = allRWString
+    return render(request, 'control/user_info.html', context)
 
 
 def delete_profile(request, profile_id):
@@ -212,6 +207,24 @@ def delete_profile(request, profile_id):
     return redirect('control:account_info')
 
 
+def delete_ROString(request, RO_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    # pylint: disable=no-member
+    ROString = ROCommunityString.objects.get(pk=RO_id)
+    ROString.delete()
+    return redirect('control:account_info')
+
+
+def delete_RWString(request, RW_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    # pylint: disable=no-member
+    RWString = ROCommunityString.objects.get(pk=RW_id)
+    RWString.delete()
+    return redirect('control:account_info')
+
+
 def update_profile_form(request, profile_id):
     if not request.user.is_authenticated:
         return redirect('control:login')
@@ -219,6 +232,26 @@ def update_profile_form(request, profile_id):
     profile = get_object_or_404(Profile, pk=profile_id)
     if profile.user == request.user:
         return render(request, 'control/update_profile.html', {'profile': profile})
+    return HttpResponseForbidden('<h1>Access denied</h1>')
+
+
+def update_ROString_form(request, RO_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    # pylint: disable=no-member
+    ROString = get_object_or_404(ROCommunityString, pk=RO_id)
+    if ROString.user == request.user:
+        return render(request, 'control/update_ROString.html', {'ROString': ROString})
+    return HttpResponseForbidden('<h1>Access denied</h1>')
+
+
+def update_RWString_form(request, RW_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    # pylint: disable=no-member
+    RWString = get_object_or_404(RWCommunityString, pk=RW_id)
+    if RWString.user == request.user:
+        return render(request, 'control/update_RWString.html', {'RWString': RWString})
     return HttpResponseForbidden('<h1>Access denied</h1>')
 
 
@@ -260,6 +293,56 @@ def change_profile(request, profile_id):
     return redirect('control:account_info')
 
 
+def change_ROString(request, RO_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    else:
+        try:
+            if request.POST['primary']:
+                updatedString = get_object_or_404(ROCommunityString, pk=RO_id)
+                allROString = ROCommunityString.objects.filter(user=request.user)
+                for item in allROString:
+                    item.primary = False
+                    item.save()
+                updatedString.primary = True
+                updatedString.save()
+        except:
+            pass
+        form = request.POST
+        if form['community-string'] == form['community-string-confirm'] and form['community-string'] != '':
+            updatedString = get_object_or_404(ROCommunityString, pk=RO_id)
+            updatedString.name = form['name']
+            updatedString.communityString = form['community-string']
+            updatedString.save()
+            return redirect('control:account_info')
+    return redirect('control:account_info')
+
+
+def change_RWString(request, RW_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    else:
+        try:
+            if request.POST['primary']:
+                updatedString = get_object_or_404(RWCommunityString, pk=RW_id)
+                allRWString = RWCommunityString.objects.filter(user=request.user)
+                for item in allRWString:
+                    item.primary = False
+                    item.save()
+                updatedString.primary = True
+                updatedString.save()
+        except:
+            pass
+        form = request.POST
+        if form['community-string'] == form['community-string-confirm'] and form['community-string'] != '':
+            updatedString = get_object_or_404(RWCommunityString, pk=RW_id)
+            updatedString.name = form['name']
+            updatedString.communityString = form['community-string']
+            updatedString.save()
+            return redirect('control:account_info')
+    return redirect('control:account_info')
+
+
 def diviceList(request):
     if not request.user.is_authenticated:
         return redirect('control:login')
@@ -267,6 +350,7 @@ def diviceList(request):
         # pylint: disable=no-member
         allDevices = Device.objects.filter(user=request.user)
         allProfiles = Profile.objects.filter(user=request.user)
+        allConfigs = UserConfig.objects.filter(user=request.user)
         # allDevices_json = json.loads(serializers.serialize('json',allDevices))
         # profile = Profile.objects.get(primary=True)
         # deviceList = []
@@ -275,7 +359,8 @@ def diviceList(request):
         #     if networkDevice.checkStatus()['is_alive']:
         #         item['fields']['status'] = 'up'
         #     deviceList.append(item['fields'])
-        return render(request, 'control/device_list.html', {'allDevices': allDevices, 'allProfiles': allProfiles})
+        return render(request, 'control/device_list.html',
+                      {'allDevices': allDevices, 'allProfiles': allProfiles, 'allConfigs': allConfigs})
 
 
 def remove_device(request):
@@ -322,7 +407,7 @@ def getDeviceInfo(request, device_id):
 def getDeviceInfoAPI(request, device_id):
     try:
         querySet = get_object_or_404(Device, pk=device_id)
-        print(querySet.deviceType)
+        # print(querySet.deviceType)
         # pylint: disable=no-member
         profile = Profile.objects.get(primary=True)
         response = []
@@ -463,8 +548,9 @@ def userList(request):
     if checkDomain() != True:
         return redirect('control:block')
     allUser = DSUser.objects.all()
-    context = {'allUser':allUser}
-    return render(request,'pages/userList.html',context)
+    context = {'allUser': allUser}
+    return render(request, 'pages/userList.html', context)
+
 
 def promoteDomain(request):
     if not request.user.is_authenticated:
@@ -625,7 +711,26 @@ def manual_config_form(request):
         return redirect('control:login')
     form = request.POST
     threads = []
+    # print(form['config'])
+    # configFile = get_object_or_404(UserConfig, pk=form['config_file'])
+    # print(type(configFile.configPath.read()))
     try:
+        if form['config_file']:
+            for id in form.getlist('device'):
+                querySet = get_object_or_404(Device, pk=id)
+                profile = get_object_or_404(Profile, pk=form['profile'])
+                configFile = get_object_or_404(UserConfig, pk=form['config_file'])
+                config = configFile.configPath.read().decode("utf-8")
+                networkDevice = device(querySet.managementIP, 22, profile.profileName, profile.profilePassword,
+                                       profile.profileEnablePassword, querySet.deviceType)
+
+                t = threading.Thread(target=networkDevice.manual_config, args=[config])
+                t.start()
+                threads.append(t)
+            for thread in threads:
+                print(thread)
+                thread.join()
+            return (redirect('control:device_list'))
         for id in form.getlist('device'):
             querySet = get_object_or_404(Device, pk=id)
             profile = get_object_or_404(Profile, pk=form['profile'])
@@ -637,6 +742,7 @@ def manual_config_form(request):
             threads.append(t)
         for thread in threads:
             thread.join()
+        return (redirect('control:device_list'))
     except Exception as e:
         print(e)
     return (redirect('control:device_list'))
@@ -652,7 +758,8 @@ def create_config(request):
         configFile = form.save(commit=False)
         fileType = request.FILES['config_file'].name.split('.')[-1]
         if fileType != extension:
-            return render(request, 'control/configure_mainpage.html', {'Error': 'Must be in .cfg format', 'configList': configFileList})
+            return render(request, 'control/configure_mainpage.html',
+                          {'Error': 'Must be in .cfg format', 'configList': configFileList})
         configFile.user = request.user
         configFile.fileName = request.FILES['config_file'].name
         configFile.dateAdded = date.today().strftime("%Y-%m-%d")
@@ -661,25 +768,252 @@ def create_config(request):
         configFile.save()
         return render(request, 'control/configure_mainpage.html', {'configList': configFileList})
     return render(request, 'control/configure_mainpage.html', {'configList': configFileList})
-    # configPath = ExtendedUser.objects.get(user=request.user).configLocation
-    # try:
-    #     fsutil.assert_exists(configPath)
-    #     files = fsutil.list_files(configPath)
-    #     fileList = []
-    #     for item in files:
-    #         file = {}
-    #         file['name'] = item.split(os.sep)[-1]
-    #         file['path'] = "../../.." + item.replace(settings.MEDIA_ROOT, "").replace(os.sep, '/')
-    #         file['date'] = fsutil.get_file_creation_date_formatted(item, format='%d/%m/%Y')
-    #         fileList.append(file)
-    # except Exception as e:
-    #     print(e)
-    #     return render(request, 'control/configure_mainpage.html', {'Error': "Config path doesn't exists"})
 
-    # if request.method == 'POST':
-    #     extension = 'cfg'
-    #     configFile = request.FILES['config-file']
-    #     fileType = configFile.name.split('.')[-1]
-    #     if fileType != extension:
-    #         return render(request,)
 
+def delete_config(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    configFile = get_object_or_404(UserConfig, pk=request.POST['delete'])
+    os.remove(os.path.join(settings.MEDIA_ROOT, str(configFile.configPath)))
+    configFile.delete()
+    return redirect('control:create_config')
+
+
+def getDeviceRunningConfig(request, device_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    deviceInfo = get_object_or_404(Device, pk=device_id)
+    profile = Profile.objects.get(user=request.user, primary=True)
+    networkDevice = device(deviceInfo.managementIP, 22, profile.profileName, profile.profilePassword,
+                           profile.profileEnablePassword, 'ios')
+    runningConfig = networkDevice.getRunningConfig()
+    # print(runningConfig)
+    response = HttpResponse(runningConfig, content_type='text/plain')
+    response['Content-Disposition'] = "attachment; filename={0}_running_config.txt".format(deviceInfo.hostname)
+    return response
+
+
+def getDeviceStartupConfig(request, device_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    deviceInfo = get_object_or_404(Device, pk=device_id)
+    profile = Profile.objects.get(user=request.user, primary=True)
+    networkDevice = device(deviceInfo.managementIP, 22, profile.profileName, profile.profilePassword,
+                           profile.profileEnablePassword, 'ios')
+    runningConfig = networkDevice.getStartupConfig()
+    # print(runningConfig)
+    response = HttpResponse(runningConfig, content_type='text/plain')
+    response['Content-Disposition'] = "attachment; filename={0}_startup_config.txt".format(deviceInfo.hostname)
+    return response
+
+
+def get_config(request, config_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    configFile = get_object_or_404(UserConfig, pk=config_id)
+    filename = configFile
+    response = HttpResponse(configFile.configPath, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+    return response
+
+
+def host_info_API(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    response = baseInfo()
+    return JsonResponse(response, safe=False)
+
+
+def host_monitor_API(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    response = resourceMonitor()
+    return JsonResponse(response, safe=False)
+
+
+def device_monitor_API(request, device_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    response = {}
+    target = get_object_or_404(Device, id=device_id)
+    readString = get_object_or_404(ROCommunityString, user=request.user, primary=True)
+    writeString = get_object_or_404(RWCommunityString, user=request.user, primary=True)
+    device = managedDevice(target.managementIP, readString.communityString, writeString.communityString)
+    memoryEntries = device.memoryUsage()
+    cpuUsage = device.cpuUsage()
+    usedMemory = int(memoryEntries['1.3.6.1.4.1.9.9.48.1.1.1.5.1'])
+    totalMemory = int(memoryEntries['1.3.6.1.4.1.9.9.48.1.1.1.5.1']) + \
+                  int(memoryEntries['1.3.6.1.4.1.9.9.48.1.1.1.6.1'])
+    memoryPercent = round((usedMemory / totalMemory)*100)
+    cpuPercent = cpuUsage['1.3.6.1.4.1.9.9.109.1.1.1.1.6.7']
+    response['memoryPercent'] = memoryPercent
+    response['cpuPercent'] = cpuPercent
+    return JsonResponse(response, safe=False)
+
+def create_snmp_read_cred(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    if request.method == 'GET':
+        return redirect('control:add_profile')
+    form = request.POST
+    if form['communityString'] == form['communityString_confirm']:
+        newString = ROCommunityString(user=request.user, name=form['name'], communityString=form['communityString'])
+        newString.save()
+        return redirect('control:account_info')
+    return redirect('control:add_profile')
+
+
+def create_snmp_write_cred(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    if request.method == 'GET':
+        return redirect('control:add_profile')
+    form = request.POST
+    if form['communityString'] == form['communityString_confirm']:
+        newString = RWCommunityString(user=request.user, name=form['name'], communityString=form['communityString'])
+        newString.save()
+        return redirect('control:account_info')
+    return redirect('control:add_profile')
+
+
+def listActiveDevice(device, lst):
+    lstItem = device.getHostName()['1.3.6.1.4.1.9.2.1.3.0']
+    lst.append(lstItem)
+    return
+
+
+def check_devices_API(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    threads, lst = [], []
+    allDevices = Device.objects.filter(user=request.user)
+    readString = get_object_or_404(ROCommunityString, user=request.user, primary=True)
+    writeString = get_object_or_404(RWCommunityString, user=request.user, primary=True)
+
+    # with concurrent.futures.ProcessPoolExecutor() as executor:
+    for device in allDevices:
+        targetDevice = managedDevice(device.managementIP, readString.communityString, writeString.communityString)
+        t = threading.Thread(target=listActiveDevice, args=(targetDevice, lst))
+        threads.append(t)
+        t.start()
+    return JsonResponse(lst, safe=False)
+
+
+def traceroute_page(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    allDevices = Device.objects.filter(user=request.user)
+    return render(request, 'control/traceroute.html', {'allDevices': allDevices})
+
+
+def traceroute(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    response=[]
+    form = json.loads(request.body)
+    profile = get_object_or_404(Profile, user=request.user, primary=True)
+    source = get_object_or_404(Device, pk=form['source'])
+    dest = form['dest']
+    # print(source)
+    source_device = device(source.hostname, 22, profile.profileName, profile.profilePassword, profile.profileEnablePassword, 'ios')
+    response = source_device.tracert(dest)
+    # print(response)
+    # response = [
+    #     {
+    #         "hop_num": "1",
+    #         "address": "192.168.1.1",
+    #         "fqdn": "",
+    #         "rtt_response": [
+    #             "1",
+    #             "1",
+    #             "2"
+    #         ],
+    #         "details": ""
+    #     },
+    #     {
+    #         "hop_num": "2",
+    #         "address": "123.29.12.132",
+    #         "fqdn": "static.vnpt.vn",
+    #         "rtt_response": [
+    #             "4",
+    #             "7",
+    #             "4"
+    #         ],
+    #         "details": ""
+    #     },
+    #     {
+    #         "hop_num": "3",
+    #         "address": "113.171.45.225",
+    #         "fqdn": "static.vnpt.vn",
+    #         "rtt_response": [
+    #             "33",
+    #             "29"
+    #         ],
+    #         "details": "MPLS: Label 387570 Exp 1"
+    #     },
+    #     {
+    #         "hop_num": "3",
+    #         "address": "113.171.45.222",
+    #         "fqdn": "static.vnpt.vn",
+    #         "rtt_response": [
+    #             "32"
+    #         ],
+    #         "details": "MPLS: Label 387570 Exp 1"
+    #     },
+    #     {
+    #         "hop_num": "4",
+    #         "address": "113.171.50.226",
+    #         "fqdn": "static.vnpt.vn",
+    #         "rtt_response": [
+    #             "9",
+    #             "8",
+    #             "7"
+    #         ],
+    #         "details": "MPLS: Label 13545 Exp 1"
+    #     },
+    #     {
+    #         "hop_num": "5",
+    #         "address": "113.171.37.231",
+    #         "fqdn": "static.vnpt.vn",
+    #         "rtt_response": [
+    #             "32",
+    #             "32",
+    #             "31"
+    #         ],
+    #         "details": ""
+    #     },
+    #     {
+    #         "hop_num": "6",
+    #         "address": "72.14.213.88",
+    #         "fqdn": "",
+    #         "rtt_response": [
+    #             "32",
+    #             "32",
+    #             "33"
+    #         ],
+    #         "details": ""
+    #     },
+    #     {
+    #         "hop_num": "7",
+    #         "address": "",
+    #         "fqdn": "",
+    #         "rtt_response": [
+    #             "*",
+    #             "*",
+    #             "*"
+    #         ],
+    #         "details": ""
+    #     },
+    #     {
+    #         "hop_num": "8",
+    #         "address": "8.8.8.8",
+    #         "fqdn": "dns.google",
+    #         "rtt_response": [
+    #             "48",
+    #             "31",
+    #             "33"
+    #         ],
+    #         "details": ""
+    #     }
+    # ]
+    return JsonResponse(response, safe=False)

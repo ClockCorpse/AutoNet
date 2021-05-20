@@ -1,0 +1,55 @@
+{% extends 'control/base.html' %}{% load static %}{% block deviceList_active %}active{% endblock %}{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-4 col-md-3">
+            <div class="card account-info-wrapper">
+                <div class="card-heading text-center">
+                    <h4 class="title">Device status</h4>
+                </div>
+                <div class="card-body small-box">
+                    <span><strong id='brand'>Loading...</strong></span><br>
+<!--                    <span>Up time: </span> <strong><span id="up-time">Loading...</span></strong><br>-->
+                    <span>Base speed: <strong id='freq'>Loading...</strong></span><br>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8 col-md-9 flex-row">
+            <div class="card account-info-wrapper">
+                <div class="card-body" style="padding: 20px; overflow-x: scroll !important;">
+                    <h3>Host Resource Utilization</h3><br>
+                    <div class="chart-container">
+                        <canvas id="resource" width="650" height="200"></canvas>
+                    </div>
+                    <div class="row">
+                        <div class="row col-sm-4 col-md-6">
+                            <div class="col-md-1"></div>
+                            <div class="col-sm-2 col-md-5">
+                                <h5>CPU</h5>
+                                <h4><span id="cpu-percent">--</span>%</h4>
+                            </div>
+                            <div class="col-sm-2 col-md-5">
+                                <h5>Memory</h5>
+                                <h4><span id="ram-percent">--</span>%</h4>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'script/cpu_chart.js' %}"></script>
+<script src="{% static 'script/host_base_info.js' %}"></script>
+<script>
+        var baseInfoRequest = "{% url 'control:base_info' %}"
+        getBaseInfo(baseInfoRequest);
+</script>
+<script src="{% static 'script/update_host_resource_usage.js' %}"></script>
+<script>
+    var usageInfoRequest =  "{% url 'control:usage_info' %}"
+    updateUsageInfo(usageInfoRequest);
+    setInterval(updateUsageInfo,2000,usageInfoRequest);
+</script>
+{% endblock %}

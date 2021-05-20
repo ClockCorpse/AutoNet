@@ -53,6 +53,26 @@ class Device(models.Model):
         return self.hostname
 
 
+class ROCommunityString(models.Model):
+    user = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    communityString = models.CharField(max_length=255)
+    primary = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
+class RWCommunityString(models.Model):
+    user = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    communityString = models.CharField(max_length=255)
+    primary = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
 class DeviceTemp(models.Model):
     user = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
     hostname = models.CharField(max_length=255)

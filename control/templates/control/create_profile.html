@@ -7,44 +7,155 @@
                     <h4 class="title">Create profile</h4>
                 </div>
                 <div class="card-body">
-                    <form class="form-horizontal" action="{% url 'control:add_profile' %}" method="POST">
-                        {% csrf_token %}
-                        <fieldset>
-                            <div class="control-group">
-                                <!-- Profile name -->
-                                <label class="control-label" for="username">Profile name (user)</label>
-                                <div class="controls">
-                                    <input type="text" name="profileName" placeholder="" class="form-control">
-                                    <p class="small text-danger">{{form.profileName.errors}}</p>
-                                </div>
-                            </div>
+                    <div class="col-sm-12 col-md-12">
+                        <div style="margin-bottom:20px">
+                            <ul class="nav nav-pills" style="display: flex; justify-content: center;">
+                                <li class="nav-item">
+                                    <a class="nav-link active" role="tab" data-toggle="tab" href="#profile">Profile</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" role="tab" data-toggle="tab" href="#RO">SNMP Read</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" role="tab" data-toggle="tab" href="#RW">SNMP Write</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tab-content">
+                        <div id="profile" role="tabpanel" class="col-sm-12 col-md-12 tab-pane fade show active">
+                            <form class="form-horizontal" action="{% url 'control:add_profile' %}" method="POST">
+                                {% csrf_token %}
+                                <fieldset>
+                                    <div class="control-group">
+                                        <!-- Profile name -->
+                                        <label class="control-label" for="username">Profile name (user)</label>
+                                        <div class="controls">
+                                            <input type="text" name="profileName" placeholder="" class="form-control">
+                                            <p class="small text-danger">{{form.profileName.errors}}</p>
+                                        </div>
+                                    </div>
 
-                            <div class="control-group">
-                                <!-- Password-->
-                                <label class="control-label" for="password">Password</label>
-                                <div class="controls">
-                                    <input type="password" name="profilePassword" placeholder="" class="form-control">
-                                    <p class="small text-danger">{{form.profilePassword.errors}}</p>
-                                </div>
-                            </div>
+                                    <div class="control-group">
+                                        <!-- Password-->
+                                        <label class="control-label" for="password">Password</label>
+                                        <div class="controls">
+                                            <input type="password" name="profilePassword" placeholder=""
+                                                   class="form-control">
+                                            <p class="small text-danger">{{form.profilePassword.errors}}</p>
+                                        </div>
+                                    </div>
 
-                            <div class="control-group">
-                                <!-- Enable -->
-                                <label class="control-label" for="email">Enable password</label>
-                                <div class="controls">
-                                    <input type="password" name="profileEnablePassword" placeholder="" class="form-control">
-                                    <p class="small text-danger">{{form.profileEnablePassword.errors}}</p>
-                                </div>
-                            </div>
+                                    <div class="control-group">
+                                        <!-- Enable -->
+                                        <label class="control-label" for="email">Enable password</label>
+                                        <div class="controls">
+                                            <input type="password" name="profileEnablePassword" placeholder=""
+                                                   class="form-control">
+                                            <p class="small text-danger">{{form.profileEnablePassword.errors}}</p>
+                                        </div>
+                                    </div>
 
-                            <div class="control-group">
-                                <!-- Button -->
-                                <div class="controls">
-                                    <button class="btn btn-success" type="submit"><span class="fas fa-plus-circle"></span>&nbsp;Add</button>
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
+                                    <div class="control-group">
+                                        <!-- Button -->
+                                        <div class="controls">
+                                            <button class="btn btn-success" type="submit"><span
+                                                    class="fas fa-plus-circle"></span>&nbsp;Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div id="RO" role="tabpanel" class="col-sm-12 col-md-12 tab-pane fade">
+                            <form class="form-horizontal" action="{% url 'control:make_SNMPRead' %}" method="POST">
+                                {% csrf_token %}
+                                <fieldset>
+                                    <div class="control-group">
+                                        <!-- Profile name -->
+                                        <label class="control-label" for="name">Name</label>
+                                        <div class="controls">
+                                            <input type="text" name="name" placeholder="" class="form-control">
+                                            <p class="small text-danger">{{form.name.errors}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <!-- Password-->
+                                        <label class="control-label" for="communityString">Community String</label>
+                                        <div class="controls">
+                                            <input type="password" name="communityString" placeholder=""
+                                                   class="form-control">
+                                            <p class="small text-danger">{{form.communityString.errors}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <!-- Enable -->
+                                        <label class="control-label" for="communityString_confirm">Confirm Community String</label>
+                                        <div class="controls">
+                                            <input type="password" name="communityString_confirm" placeholder=""
+                                                   class="form-control">
+                                            <p class="small text-danger">{{form.communityString_confirm.errors}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <!-- Button -->
+                                        <div class="controls">
+                                            <button class="btn btn-success" type="submit"><span
+                                                    class="fas fa-plus-circle"></span>&nbsp;Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                        <div id="RW" role="tabpanel" class="col-sm-12 col-md-12 tab-pane fade">
+                            <form class="form-horizontal" action="{% url 'control:make_SNMPWrite' %}" method="POST">
+                                {% csrf_token %}
+                                <fieldset>
+                                    <div class="control-group">
+                                        <!-- Profile name -->
+                                        <label class="control-label" for="name">Name</label>
+                                        <div class="controls">
+                                            <input type="text" name="name" placeholder="" class="form-control">
+                                            <p class="small text-danger">{{form.name.errors}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <!-- Password-->
+                                        <label class="control-label" for="communityString">Community String</label>
+                                        <div class="controls">
+                                            <input type="password" name="communityString" placeholder=""
+                                                   class="form-control">
+                                            <p class="small text-danger">{{form.communityString.errors}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <!-- Enable -->
+                                        <label class="control-label" for="communityString_confirm">Confirm Community String</label>
+                                        <div class="controls">
+                                            <input type="password" name="communityString_confirm" placeholder=""
+                                                   class="form-control">
+                                            <p class="small text-danger">{{form.communityString_confirm.errors}}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-group">
+                                        <!-- Button -->
+                                        <div class="controls">
+                                            <button class="btn btn-success" type="submit"><span
+                                                    class="fas fa-plus-circle"></span>&nbsp;Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

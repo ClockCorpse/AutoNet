@@ -58,6 +58,15 @@
                                             {% endfor %}
                                         </select>
                                     </div>
+                                    <div class="input-group" style="margin-top:20px">
+                                        <select class="select-style" name="config_file">
+                                            <option class="option-style">Config</option>
+                                            {% for config in allConfigs %}
+                                            <option class="option-style" value="{{config.id}}">{{config.fileName}}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                     <div class="form-check" style="margin:20px; background-color: #fefefe; border: 1px solid #cdcdcd; overflow-y: scroll;height: 200px;">
                                         <div style="padding: 5px; margin: 5px; margin-left: 10px;">
                                             <input class="form-check-input" type="checkbox" value="" onclick="toggle(this)" >

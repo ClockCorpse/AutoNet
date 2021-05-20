@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Device, DeviceTemp, ExtendedUser, UserConfig
+from .models import Profile, Device, DeviceTemp, ExtendedUser, UserConfig,ROCommunityString,RWCommunityString
 # Register your models here.
 
 # admin.site.register(Profile)
@@ -8,3 +8,5 @@ admin.site.register(DeviceTemp)
 admin.site.register(Profile)
 admin.site.register(ExtendedUser)
 admin.site.register(UserConfig)
+admin.site.register(ROCommunityString)
+admin.site.register(RWCommunityString)
