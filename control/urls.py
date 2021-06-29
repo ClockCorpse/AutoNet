@@ -13,6 +13,7 @@ urlpatterns = [
     path('logout/', views.logout_user, name='logout'),
     path('register/', views.register, name='register'),
     path('account_info/make_profile/', views.make_profile, name='add_profile'),
+    path('account_info/make_profile/set_nag_server', views.set_nagios_server, name='set_nag'),
     path('account_info/make_profile/make_SNMPRead', views.create_snmp_read_cred, name='make_SNMPRead'),
     path('account_info/make_profile/make_SNMPWrite', views.create_snmp_write_cred, name='make_SNMPWrite'),
     path('account_info/<int:profile_id>/delete/', views.delete_profile, name='delete_profile'),
@@ -43,13 +44,15 @@ urlpatterns = [
     path('configure/<int:config_id>/get', views.get_config, name='get_config'),
     path('configure/delete', views.delete_config, name='delete_config'),
     path('device_list/manual_config', views.manual_config_form, name='manual_config_form'),
+    path('device_detail/<int:deviceID>/<int:interfaceID>/keepAlive', views.toggle_keepAlive, name='keepAlive'),
     path('device_detail/<int:device_id>/get_running', views.getDeviceRunningConfig, name='get_running'),
     path('device_detail/<int:device_id>/get_startup', views.getDeviceStartupConfig, name='get_startup'),
     path('base_info', views.host_info_API, name='base_info'),
     path('host_usage_info', views.host_monitor_API, name='usage_info'),
     path('device_detail/<int:device_id>/get_usage', views.device_monitor_API, name='device_usage_info'),
-    # path('check_devices', views.check_devices_API, name='check_devices'),
+    
     path('traceroute', views.traceroute_page, name='traceroute_page'),
-    path('traceroute_return', views.traceroute, name='traceroute')
+    path('traceroute_return', views.traceroute, name='traceroute'),
+    path('device_detail/<int:device_id>/get_routing_table', views.routingTableAPI, name='get_routing_table'),
 
 ]

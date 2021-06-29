@@ -48,6 +48,7 @@ class device:
                                 username=self.username,
                                 password=self.password)
         output = sshCli.send_command('show cdp neighbor detail', use_textfsm=True)
+        sshCli.disconnect()
         return output
 
     def getInterfaceAPI(self):
@@ -100,7 +101,57 @@ class device:
         device_os = 'ios'
         try:
             driver = get_network_driver(device_os)
-            device = driver(self.host, self.username, self.password, optional_args={'secret': self.enablePassword})
+            device = driver(self.host, self.username, self.password, optional_args={'global_delay_factor': 2,'secret': self.enablePassword})
+            device.open()
+            device.load_merge_candidate(config=config)
+            print(device.compare_config())
+            device.commit_config()
+            device.close()
+            return 0
+        except Exception as e:
+            print(e)
+            return 1
+
+    def enable_keepAlive(self, interfaceName):
+        device_os = ''
+        config = fr'''
+        event manager applet {interfaceName}_AUTO_NO_SHUT
+        event syslog pattern "Interface {interfaceName}, changed state to administratively down"
+        action 1.0 cli command "enable"
+        action 1.1 cli command "conf t"
+        action 1.2 cli command "interface {interfaceName}"
+        action 1.3 cli command "no shutdown"
+        '''
+        print(config)
+        # event manager applet 
+        # event syslog pattern "Interface GigabitEthernet4, changed state to adminisratively down
+        # action 1.0 cli command "enable"
+        # action 1.1 cli command "conf t"
+        # action 1.2 cli command "int g4"
+        # action 1.3 cli command "no shut"
+        # if self.deviceDriver = 'cisco_ios':
+        device_os = 'ios'
+        try:
+            driver = get_network_driver(device_os)
+            device = driver(self.host, self.username, self.password, optional_args={'global_delay_factor': 2,'secret': self.enablePassword})
+            device.open()
+            device.load_merge_candidate(config=config)
+            print(device.compare_config())
+            device.commit_config()
+            device.close()
+            return 0
+        except Exception as e:
+            print(e)
+            return 1
+    
+    def disable_keepAlive(self, interfaceName):
+        device_os = ''
+        config = f'no event manager applet {interfaceName}_AUTO_NO_SHUT'
+        # if self.deviceDriver = 'cisco_ios':
+        device_os = 'ios'
+        try:
+            driver = get_network_driver(device_os)
+            device = driver(self.host, self.username, self.password, optional_args={'global_delay_factor': 2,'secret': self.enablePassword})
             device.open()
             device.load_merge_candidate(config=config)
             print(device.compare_config())
@@ -113,11 +164,23 @@ class device:
 
     def tracert(self, dest):
         sshCli = ConnectHandler(device_type='cisco_ios',
-                                host='192.168.1.19',
-                                port=22,
-                                username='cisco',
-                                password='cisco')
+                                host=self.host,
+                                port=self.port,
+                                username=self.username,
+                                password=self.password)
         output = sshCli.send_command(f'traceroute {dest}', expect_string=r"#", use_textfsm=True)
+        sshCli.disconnect()
+        return output
+
+
+    def getRoutingTable(self):
+        sshCli = ConnectHandler(device_type='cisco_ios',
+                                host=self.host,
+                                port=self.port,
+                                username=self.username,
+                                password=self.password)
+        output = sshCli.send_command(f'show ip route', use_textfsm=True)
+        sshCli.disconnect()
         return output
     # driver = get_network_driver('ios')
     # device = driver('10.0.0.20', 'cisco', 'cisco',optional_args={'secret':'cisco'})

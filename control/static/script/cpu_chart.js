@@ -27,12 +27,13 @@ var cpuChart = document.getElementById('resource').getContext('2d')
                 }],
             },
             options: {
-                legend: {
-                    display: false,
-                },
                 scales: {
-                    xAxes: [],
-                    yAxes: {
+                    x: {
+                        grid: {
+                          display: false,
+                        }
+                      },
+                    y: {
                         suggestedMin: 0,
                         suggestedMax: 100
                     }

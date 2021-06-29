@@ -1,8 +1,8 @@
 {% extends 'control/base.html' %}{% block discover_active %}active{% endblock %} {% block body %} {% if timeout_error_message %}
-<script>
+<!-- <script>
     alert("{{timeout_error_message}}")
 
-</script>
+</script> -->
 {% endif %}
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -41,6 +41,7 @@
                             </div>
                         </div>
                         <br>
+                        {% if error_message %}<span class="text-danger small">{{profile_error_message}}</span>{% endif %}
                         <div class=" form-row justify-content-center">
                             <input type="submit" class="btn btn-success" style="width: 100px;" value="Start">
                         </div>

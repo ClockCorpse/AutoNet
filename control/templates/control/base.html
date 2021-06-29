@@ -24,21 +24,21 @@
     <div id="wrapper" class>
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
-            <div class="brand-wrapper">
+            <!-- <div class="brand-wrapper">
                 <a href="#" class="btn" style="color: #ddd; margin-left: -1px; margin-top: 0px;" id="menu-toggle-side">
                     <i class="fas fa-bars"></i>
                 </a>&nbsp;&nbsp;
                 <a class="brand-sidebar" href="{% url 'control:index' %}">AutoNet</a>
-            </div>
+            </div> -->
             <span class="sidebar-heading">
                 <span><i class="fas fa-tachometer-alt"></i>&nbsp;&nbsp;Dashboard</span>
             </span>
-            <ul class="sidebar-nav">
+            <!-- <ul class="sidebar-nav">
                 <span class="sub-heading">Domain Service</span>
                 <li><a href="{% url 'control:DSUserList' %}"><i class="fas fa-user">&nbsp;&nbsp;</i>User</a></li>
                 <li><a href="{% url 'control:addOU' %}"><i class="fas fa-users">&nbsp;&nbsp;</i>Group</a></li>
                 <li><a href="{% url 'control:promoteDomain' %}"><i class="fas fa-arrow-circle-up">&nbsp;&nbsp;</i>Promote Domain</a></li>
-            </ul>
+            </ul> -->
             <ul class="sidebar-nav">
                 <span class="sub-heading">Devices</span>
                 <li class="{% block discover_active %}{% endblock %}"><a href="{% url 'control:discover_devices' %}"><i class="fas fa-map">&nbsp;&nbsp;</i>Discover</a></li>
@@ -57,12 +57,12 @@
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-custom" style="height: 57px; background: #2c3e50;">
+        <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-custom" style="height: 57px;">
             <div class="container-fluid">
                 <!--Logo-->
                 <div class="navbar-header">
                     <a href="#" class="btn" id="menu-toggle">
-                        <i class="fas fa-bars"></i>
+                        <i class="fas fa-bars" style="color: #ddd;"></i>
                     </a>&nbsp;&nbsp;
                     <a class="navbar-brand" href="{% url 'control:index' %}" style="padding-top: 10px; color: #ddd;">AutoNet</a>
                 </div>

@@ -37,6 +37,13 @@ class Profile(models.Model):
     def __str__(self):
         return self.profileName
 
+class NagiosServer(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    hostname = models.GenericIPAddressField()
+    authKey = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.hostname
 
 class Device(models.Model):
     user = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
@@ -52,6 +59,12 @@ class Device(models.Model):
     def __str__(self):
         return self.hostname
 
+class DeviceInterface(models.Model):
+    Device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    interfaceName = models.CharField(max_length=255)
+    keepAlive = models.BooleanField(default=False)
+    def __str__(self):
+        return self.interfaceName
 
 class ROCommunityString(models.Model):
     user = models.ForeignKey(User, default=1, on_delete=models.CASCADE)

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django import forms
-from .models import Profile, ExtendedUser, UserConfig, ROCommunityString, RWCommunityString
+from .models import Profile, ExtendedUser, UserConfig, ROCommunityString, RWCommunityString, NagiosServer
 
 
 class UserForm(forms.ModelForm):
@@ -28,6 +28,10 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ['profileName', 'profilePassword', 'profileEnablePassword']
 
+class NagiosServerForm(forms.ModelForm):
+    class Meta:
+        model = NagiosServer
+        fields = ['hostname','authKey']
 
 class ROCommunityStringForm(forms.ModelForm):
     class Meta:

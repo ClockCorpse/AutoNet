@@ -234,6 +234,54 @@
                 </div>
             </div>
         </div>
+        <div class="col-sm-12 col-md-8">
+            <div class="card account-info-wrapper" style="overflow-x: scroll !important;">
+                <div class="card-heading text-center">
+                    <h4 class="title">Nagios Server</h4>
+                </div>
+                <div class="card-body">
+                    <hr>
+                    <div class="form-group col-xs-6">
+                        <form method="POST" action="{% url 'control:set_nag' %}">
+                            {% csrf_token %}
+                            <div class="value">
+                                
+                                    <div class="value">
+                                        <h6>Address</h6>
+                                        <p class="text-muted"><small>Server address</small></p>
+                                        <div class="input-group">
+                                            <input type="text" name="hostname" class="input-style">
+                                            <div>
+                                                {% if IP_error_message %}
+                                                <span class="text-danger small">{{IP_error_message}}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <br>
+                                    </div>
+                            </div>
+                            <div class="value">
+                                <h6>Auth key</h6>
+                                <p class="text-muted"><small>API key</small></p>
+                                <div class="input-group">
+                                    <input type="text" name="authKey" class="input-style">
+                                    <div>
+                                        {% if IP_error_message %}
+                                        <span class="text-danger small">{{IP_error_message}}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class=" form-row justify-content-center">
+                        <input type="submit" class="btn btn-success" style="width: 100px;" value="Start">
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 <script src="{% static 'script/script.js' %}"></script>

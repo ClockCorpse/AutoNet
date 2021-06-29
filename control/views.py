@@ -3,9 +3,9 @@ from django.http import HttpResponse, Http404, HttpResponseForbidden, JsonRespon
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
-from .forms import UserForm, ProfileForm, UserExtendedForm, UserConfigForm, ROCommunityStringForm, RWCommunityStringForm
+from .forms import UserForm, ProfileForm, UserExtendedForm, UserConfigForm, ROCommunityStringForm, RWCommunityStringForm, NagiosServerForm
 from django.contrib.auth.models import User
-from .models import Profile, Device, DeviceTemp
+from .models import Profile, Device, DeviceTemp, DeviceInterface, NagiosServer
 from .configCalls import device
 from .device_monitor import managedDevice
 from .cpu_monitor import baseInfo, resourceMonitor
@@ -18,7 +18,7 @@ import json
 from .models import DSUser
 from . import adduser
 from control.models import ExtendedUser, UserConfig, ROCommunityString, RWCommunityString
-from django.db.models import Q
+from django.db.models import Q, F
 import csv, io, os, pathlib, subprocess, sys, os, fabric, paramiko, fsutil, psutil, concurrent.futures, time
 from datetime import date
 from zipfile import ZipFile
@@ -97,6 +97,24 @@ def make_profile(request):
             return render(request, 'control/create_profile.html', {'form': form})  # Return if form is invalid
     return render(request, 'control/create_profile.html')  # Return this page if request method is GET
 
+def set_nagios_server(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')  # Redirect user to login page if not already logged in
+    else:
+        if request.method == 'POST':
+            form = NagiosServerForm(request.POST)
+            if form.is_valid():
+                allRecord = NagiosServer.objects.filter(user=request.user)
+                allRecord.delete()
+                server = form.save(commit=False)
+                server.user = request.user
+                server = form.save()
+                return redirect('control:account_info')
+            else:
+                print(form.errors)
+                return redirect('control:account_info')
+        return redirect('control:account_info')
+    return redirect('control:account_info')
 
 # Main page
 def index(request):
@@ -147,9 +165,14 @@ def discover(request):
             return render(request, 'control/discover.html', context=context)
         except Exception as e:
             print(e)
+            error_message = ''
+            if str(e) == 'string indices must be integers':
+                error_message = 'No device found!'
+            else:
+                error_message = e
             allProfiles = Profile.objects.filter(user=request.user)
             context = {'allProfiles': allProfiles,
-                       'timeout_error_message': 'Timeout !'}
+                       'error_message': e}
             return render(request, 'control/discover.html', context=context)
     except ValueError as e:
         print(e)
@@ -380,6 +403,14 @@ def deviceDetail(request, device_id):
     else:
         try:
             device = get_object_or_404(Device, pk=device_id)
+            readString = get_object_or_404(ROCommunityString, user=request.user, primary=True)
+            writeString = get_object_or_404(RWCommunityString, user=request.user, primary=True)
+            targetDevice = managedDevice(device.managementIP, readString.communityString, writeString.communityString)
+            checkLayer = targetDevice.checkIpForwarding()['1.3.6.1.2.1.4.1.0']
+            ipForwarding = False
+            if int(checkLayer) == 1:
+                ipForwarding = True
+            return render(request, 'control/device_details.html', {'device': device,'ipForwarding':ipForwarding})
         except Exception as e:
             print(e)
         return render(request, 'control/device_details.html', {'device': device})
@@ -407,12 +438,9 @@ def getDeviceInfo(request, device_id):
 def getDeviceInfoAPI(request, device_id):
     try:
         querySet = get_object_or_404(Device, pk=device_id)
-        # print(querySet.deviceType)
-        # pylint: disable=no-member
+        interfaceList=[]
+        keepAliveState={}
         profile = Profile.objects.get(primary=True)
-        response = []
-        # networkDevice = device(querySet.managementIP,22,profile.profileName,profile.profilePassword,profile.profileEnablePassword,'ios')
-        # print(profile.profileEnablePassword)
         networkDevice = device(querySet.managementIP, 22, profile.profileName, profile.profilePassword, 'cisco', 'ios')
         intStat_ip, intStat = networkDevice.getInterfaceInfo()
         fact = networkDevice.getDeviceFact()
@@ -420,8 +448,27 @@ def getDeviceInfoAPI(request, device_id):
         response.append(intStat)
         response.append(intStat_ip)
         response.append(fact)
+        response.append(keepAliveState)
+        response.append({'deviceID':device_id})
         querySet.hostname = fact['hostname']
         querySet.save()
+        interfaceListCurrent = response[-3]['interface_list']
+        interfaceList_qs = DeviceInterface.objects.filter(Device=device_id).values_list('id','interfaceName','keepAlive')
+        for item in interfaceList_qs:
+            keepAliveState[item[1]] = {}
+            keepAliveState[item[1]]['id'] = item[0]
+            keepAliveState[item[1]]['status'] = item[2]
+            interfaceList.append(item[0])
+        response[-2] = keepAliveState   
+        interfaceListNew = list(set(interfaceListCurrent) - set(interfaceList))
+        interfaceListOld = list(set(interfaceList) - set(interfaceListCurrent))
+        for item in interfaceListOld:
+            interface = get_object_or_404(DeviceInterface, interfaceName=item)
+            interface.delete()
+        for item in interfaceListNew:
+            interface = DeviceInterface(Device=querySet, interfaceName=item, keepAlive=False)
+            interface.save()
+        print(json.dumps(response, indent=4))
     except Exception as e:
         print(e)
     return JsonResponse(response, safe=False)
@@ -711,9 +758,6 @@ def manual_config_form(request):
         return redirect('control:login')
     form = request.POST
     threads = []
-    # print(form['config'])
-    # configFile = get_object_or_404(UserConfig, pk=form['config_file'])
-    # print(type(configFile.configPath.read()))
     try:
         if form['config_file']:
             for id in form.getlist('device'):
@@ -816,6 +860,29 @@ def get_config(request, config_id):
     response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
 
+def toggle_keepAlive(request, deviceID, interfaceID):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    interface = get_object_or_404(DeviceInterface,id=interfaceID)
+    querySet = get_object_or_404(Device, pk=deviceID)
+    profile = get_object_or_404(Profile, primary=True)
+    try:
+        if interface.keepAlive == True:
+            networkDevice = device(querySet.managementIP, 22, profile.profileName, profile.profilePassword,
+                                       profile.profileEnablePassword, querySet.deviceType)
+            networkDevice.disable_keepAlive(interface.interfaceName)
+            interface.keepAlive = False
+        else:
+            networkDevice = device(querySet.managementIP, 22, profile.profileName, profile.profilePassword,
+                                       profile.profileEnablePassword, querySet.deviceType)
+            networkDevice.enable_keepAlive(interface.interfaceName)
+            interface.keepAlive =True
+        interface.save()
+        return JsonResponse({"success": True})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'success': False})
+
 
 def host_info_API(request):
     if not request.user.is_authenticated:
@@ -915,105 +982,21 @@ def traceroute(request):
     source = get_object_or_404(Device, pk=form['source'])
     dest = form['dest']
     # print(source)
-    source_device = device(source.hostname, 22, profile.profileName, profile.profilePassword, profile.profileEnablePassword, 'ios')
+    source_device = device(source.hostname, 
+                            22, 
+                            profile.profileName, 
+                            profile.profilePassword, 
+                            profile.profileEnablePassword, 
+                            'ios')
     response = source_device.tracert(dest)
-    # print(response)
-    # response = [
-    #     {
-    #         "hop_num": "1",
-    #         "address": "192.168.1.1",
-    #         "fqdn": "",
-    #         "rtt_response": [
-    #             "1",
-    #             "1",
-    #             "2"
-    #         ],
-    #         "details": ""
-    #     },
-    #     {
-    #         "hop_num": "2",
-    #         "address": "123.29.12.132",
-    #         "fqdn": "static.vnpt.vn",
-    #         "rtt_response": [
-    #             "4",
-    #             "7",
-    #             "4"
-    #         ],
-    #         "details": ""
-    #     },
-    #     {
-    #         "hop_num": "3",
-    #         "address": "113.171.45.225",
-    #         "fqdn": "static.vnpt.vn",
-    #         "rtt_response": [
-    #             "33",
-    #             "29"
-    #         ],
-    #         "details": "MPLS: Label 387570 Exp 1"
-    #     },
-    #     {
-    #         "hop_num": "3",
-    #         "address": "113.171.45.222",
-    #         "fqdn": "static.vnpt.vn",
-    #         "rtt_response": [
-    #             "32"
-    #         ],
-    #         "details": "MPLS: Label 387570 Exp 1"
-    #     },
-    #     {
-    #         "hop_num": "4",
-    #         "address": "113.171.50.226",
-    #         "fqdn": "static.vnpt.vn",
-    #         "rtt_response": [
-    #             "9",
-    #             "8",
-    #             "7"
-    #         ],
-    #         "details": "MPLS: Label 13545 Exp 1"
-    #     },
-    #     {
-    #         "hop_num": "5",
-    #         "address": "113.171.37.231",
-    #         "fqdn": "static.vnpt.vn",
-    #         "rtt_response": [
-    #             "32",
-    #             "32",
-    #             "31"
-    #         ],
-    #         "details": ""
-    #     },
-    #     {
-    #         "hop_num": "6",
-    #         "address": "72.14.213.88",
-    #         "fqdn": "",
-    #         "rtt_response": [
-    #             "32",
-    #             "32",
-    #             "33"
-    #         ],
-    #         "details": ""
-    #     },
-    #     {
-    #         "hop_num": "7",
-    #         "address": "",
-    #         "fqdn": "",
-    #         "rtt_response": [
-    #             "*",
-    #             "*",
-    #             "*"
-    #         ],
-    #         "details": ""
-    #     },
-    #     {
-    #         "hop_num": "8",
-    #         "address": "8.8.8.8",
-    #         "fqdn": "dns.google",
-    #         "rtt_response": [
-    #             "48",
-    #             "31",
-    #             "33"
-    #         ],
-    #         "details": ""
-    #     }
-    # ]
     return JsonResponse(response, safe=False)
+
+def routingTableAPI(request, device_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    profile = get_object_or_404(Profile, user=request.user, primary=True)
+    router = get_object_or_404(Device, pk=device_id)
+    targetDevice = device(router.managementIP, 22, profile.profileName, profile.profilePassword, profile.profileEnablePassword, 'ios')
+    response = targetDevice.getRoutingTable()
+    # print(json.dumps(response, indent=4))
+    return JsonResponse(response,safe=False)
