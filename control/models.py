@@ -55,6 +55,7 @@ class Device(models.Model):
     softwareVersion = models.CharField(max_length=255)
     deviceType = models.CharField(max_length=255, default='cisco_ios')
     capabilities = models.CharField(max_length=100, null=True)
+    monitored = models.BooleanField(default=False)
 
     def __str__(self):
         return self.hostname

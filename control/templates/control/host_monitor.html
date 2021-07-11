@@ -8,31 +8,61 @@
                 </div>
                 <div class="card-body small-box">
                     <span><strong id='brand'>Loading...</strong></span><br>
-<!--                    <span>Up time: </span> <strong><span id="up-time">Loading...</span></strong><br>-->
                     <span>Base speed: <strong id='freq'>Loading...</strong></span><br>
                 </div>
             </div>
         </div>
         <div class="col-sm-8 col-md-9 flex-row">
-            <div class="card account-info-wrapper">
-                <div class="card-body" style="padding: 20px; overflow-x: scroll !important;">
-                    <h3>Host Resource Utilization</h3><br>
-                    <div class="chart-container">
-                        <canvas id="resource" width="650" height="200"></canvas>
-                    </div>
-                    <div class="row">
-                        <div class="row col-sm-4 col-md-6">
-                            <div class="col-md-1"></div>
-                            <div class="col-sm-2 col-md-5">
-                                <h5>CPU</h5>
-                                <h4><span id="cpu-percent">--</span>%</h4>
-                            </div>
-                            <div class="col-sm-2 col-md-5">
-                                <h5>Memory</h5>
-                                <h4><span id="ram-percent">--</span>%</h4>
-                            </div>
-                            <div class="col-md-1"></div>
+            <div class="card account-info-wrapper card-nav-tabs">
+                <div class="card-header card-header-primary">
+                    <div class="nav-tabs-navigation">
+                        <div class="nav-tabs-wrapper">
+                            <ul class="nav nav-tabs" data-tabs="tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#inventory" data-toggle="tab" aria-controls="inventory" aria-selected="true">
+                                        Inventory
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#health" data-toggle="tab" aria-controls="health">
+                                        System health
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
+                    </div>
+                </div>
+                <div class="card-body tab-content" style="padding: 20px; height: 500px; overflow-x: scroll !important; overflow-y: scroll;">
+                    <div class="tab-pane fade show active" id="inventory" role="tabpanel">
+                        <h3>Inventory</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="devices" width="400" height="400"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="status" width="400" height="400"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="health"role="tabpanel">
+                        <h3>Host Resource Utilization</h3><br>
+                        <div class="chart-container">
+                            <canvas id="resource" width="650" height="200"></canvas>
+                        </div>
+                        <div class="row">
+                            <div class="row col-sm-4 col-md-6">
+                                <div class="col-md-1"></div>
+                                <div class="col-sm-2 col-md-5">
+                                    <h5>CPU</h5>
+                                    <h4><span id="cpu-percent">--</span>%</h4>
+                                </div>
+                                <div class="col-sm-2 col-md-5">
+                                    <h5>Memory</h5>
+                                    <h4><span id="ram-percent">--</span>%</h4>
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -41,6 +71,8 @@
     </div>
 </div>
 <script src="{% static 'script/cpu_chart.js' %}"></script>
+<script src="{% static 'script/monitoring_list.js' %}"></script>
+<script src="{% static 'script/status_list.js' %}"></script>
 <script src="{% static 'script/host_base_info.js' %}"></script>
 <script>
         var baseInfoRequest = "{% url 'control:base_info' %}"
@@ -48,8 +80,15 @@
 </script>
 <script src="{% static 'script/update_host_resource_usage.js' %}"></script>
 <script>
-    var usageInfoRequest =  "{% url 'control:usage_info' %}"
-    updateUsageInfo(usageInfoRequest);
+
+</script>
+<script>
+    usageInfoRequest =  "{% url 'control:usage_info' %}";
+    inventoryRequest = "{% url 'control:get_inventory' %}";
+    deviceStatus = "{% url 'control:get_overall_status' %}"
+    updateInventoryInfo(inventoryRequest);
+    updateDeviceStatus(deviceStatus);
     setInterval(updateUsageInfo,2000,usageInfoRequest);
 </script>
+
 {% endblock %}

@@ -380,3 +380,100 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.device-cell{
+    height: 50px;
+    background-color:#e7e7e7;
+    box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    border-left: solid #2c3e50 7px;
+}
+
+
+.cell-content{
+    display: block;
+    min-height: 50px !important;
+}
+
+.cell-content .status{
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    background-color: rgba(0, 255, 0, 1);
+    margin-top: 20px;
+}
+
+.cell-content .status-up{
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    background-color: rgba(0, 255, 0, 1);
+    margin-top: 20px;
+}
+
+.cell-content .status-down{
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    background-color: rgba(255, 0, 0, 1);
+    margin-top: 20px;
+}
+
+.cell-content .status-none{
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    background-color: rgba(150, 150, 150, 1);
+    margin-top: 20px;
+}
+
+.cell-content h4{
+    padding-top: 10px;
+}
+
+
+
+
+div.card .card-header-primary {
+    background: #2c3e50;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.card .card-header .nav-tabs {
+    padding: 0;
+}
+.nav-tabs {
+    border: 0;
+    border-radius: 3px;
+    padding: 0 15px;
+}
+
+.nav-tabs .nav-item .nav-link{
+    border: 0!important;
+    color: #fff!important;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-item .nav-link.active {
+    background-color: hsla(0,0%,100%,0.1) !important;
+    transition: background-color .3s .2s;
+}
+
+
+.nav-tabs .nav-item .nav-link {
+    color: #fff;
+    border: 0;
+    margin: 0;
+    border-radius: 3px;
+    line-height: 24px;
+    text-transform: uppercase;
+    font-size: 12px;
+    padding: 10px 15px;
+    background-color: transparent;
+    transition: background-color .3s 0s;
+}

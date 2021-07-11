@@ -22,9 +22,9 @@ urlpatterns = [
     path('account_info/profile/<int:profile_id>/', views.update_profile_form, name='update_profile_form'),
     path('account_info/SNMPRead/<int:RO_id>/', views.update_ROString_form, name='update_SNMPRead_form'),
     path('account_info/SNMPWrite/<int:RW_id>/', views.update_RWString_form, name='update_SNMPWrite_form'),
-    path('account_info/profile/update/<int:profile_id>/', views.change_profile, name='update_profile'),  # aaa
-    path('account_info/SNMPRead/update/<int:RO_id>/', views.change_ROString, name='update_SNMPRead'),  # aaa
-    path('account_info/SNMPWrite/update/<int:RW_id>/', views.change_RWString, name='update_SNMPWrite'),  # aaa
+    path('account_info/profile/update/<int:profile_id>/', views.change_profile, name='update_profile'),  
+    path('account_info/SNMPRead/update/<int:RO_id>/', views.change_ROString, name='update_SNMPRead'),  
+    path('account_info/SNMPWrite/update/<int:RW_id>/', views.change_RWString, name='update_SNMPWrite'),  
     path('account_info/password/', views.change_password, name='change_password'),
     path('device_list/', views.diviceList, name='device_list'),
     path('device_list/remove', views.remove_device, name='remove_device'),
@@ -45,14 +45,15 @@ urlpatterns = [
     path('configure/delete', views.delete_config, name='delete_config'),
     path('device_list/manual_config', views.manual_config_form, name='manual_config_form'),
     path('device_detail/<int:deviceID>/<int:interfaceID>/keepAlive', views.toggle_keepAlive, name='keepAlive'),
+    path('device_detail/<int:device_id>/monitor', views.toggle_monitor, name='monitor'),
     path('device_detail/<int:device_id>/get_running', views.getDeviceRunningConfig, name='get_running'),
     path('device_detail/<int:device_id>/get_startup', views.getDeviceStartupConfig, name='get_startup'),
     path('base_info', views.host_info_API, name='base_info'),
     path('host_usage_info', views.host_monitor_API, name='usage_info'),
     path('device_detail/<int:device_id>/get_usage', views.device_monitor_API, name='device_usage_info'),
-    
     path('traceroute', views.traceroute_page, name='traceroute_page'),
     path('traceroute_return', views.traceroute, name='traceroute'),
     path('device_detail/<int:device_id>/get_routing_table', views.routingTableAPI, name='get_routing_table'),
-
+    path('get_inventory', views.get_inventory, name='get_inventory'),
+    path('get_overall_status', views.overall_device_status, name='get_overall_status'),
 ]

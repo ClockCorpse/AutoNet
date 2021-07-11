@@ -33,7 +33,7 @@ function updateInterface(request){
             let buttonContent = 'Enable';
             let buttonStyle = 'custom-button';
             if( keepAliveStatus[item]['status'] == true){
-                buttonContent = 'Disable';
+                buttonContent = 'Enabled';
                 buttonStyle = 'btn-secondary';
             }
             idIndex = i + 1;

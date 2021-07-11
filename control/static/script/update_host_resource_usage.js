@@ -1,6 +1,6 @@
 function updateUsageInfo(usageInfoRequest){
-    var cpu_usage;
-    var used_ram;
+    cpu_usage = 0;
+    used_ram = 0;
     info = new XMLHttpRequest();
     info.open('GET', usageInfoRequest);
     info.onload = function() {

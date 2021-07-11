@@ -70,10 +70,22 @@
                     </table>
                     <div id="loading" style="width: inherit;"><div class="row justify-content-center"><div class="lds-dual-ring"></div></div></div>
                 </div>
-                {% if ipForwarding %}
-                <div class="card-footer" style="padding: 20px;">
-                    <button class="btn custom-button" data-toggle="modal" data-target="#routing-table">Routing table</button>
+                <!-- <div class="card-footer" style="padding: 20px;"> -->
+                <div class="card-footer row" style="margin:auto 0px">
+                    <div class="col-md-6">
+                        {% if ipForwarding %}
+                        <button class="btn custom-button" data-toggle="modal" data-target="#routing-table">Routing table</button>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 text-right">
+                        {% if not device.monitored %}
+                        <button id='monitor' class="btn btn-success" onclick="toggle_monitor(&apos;{% url 'control:monitor' device.id %}&apos;,&apos;{{device.id}}&apos;,&apos;monitor&apos;)">Add to monitor</button>
+                        {% else %}
+                        <button id='monitor' class="btn btn-secondary" onclick="toggle_monitor(&apos;{% url 'control:monitor' device.id %}&apos;,&apos;{{device.id}}&apos;,&apos;monitor&apos;)">Added to monitor</button>
+                        {% endif %}
+                    </div>
                 </div>
+                {% if ipForwarding %}
                 <div class=" modal fade" id="routing-table" tabindex="-1" role="dialog" aria-labelledby="routing-tableLabel" aria-hidden="true">
                     <div class="modal-dialog" style="max-width: 1140px; width:1140px;">
                         <div class="modal-content">
@@ -120,6 +132,7 @@
     </div>
 </div>
 <script src="{% static 'script/keep_alive.js' %}"></script>
+<script src="{% static 'script/toggle_monitor.js' %}"></script>
 <script src="{% static 'script/update_interface.js' %}"></script>
 <script src="{% static 'script/cpu_chart.js' %}"></script>
 <script src="{% static 'script/update_device_resource_usage.js' %}"></script>

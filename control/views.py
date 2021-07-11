@@ -7,6 +7,7 @@ from .forms import UserForm, ProfileForm, UserExtendedForm, UserConfigForm, ROCo
 from django.contrib.auth.models import User
 from .models import Profile, Device, DeviceTemp, DeviceInterface, NagiosServer
 from .configCalls import device
+from .nagios_api import host_template, get_status
 from .device_monitor import managedDevice
 from .cpu_monitor import baseInfo, resourceMonitor
 from django import forms
@@ -147,6 +148,7 @@ def discover(request):
         try:
             deviceList_output = target.discover()  # Begin discover
             for each in deviceList_output:
+                
                 hostname = each['destination_host'] = each['destination_host'].split('.')[
                     0]  # Extract device's hostname from FQDN
                 deviceType = ''
@@ -157,7 +159,6 @@ def discover(request):
                                softwareVersion=each['software_version'], deviceType=deviceType,
                                capabilities=each['capabilities'])
                 a.save()
-            print(json.dumps(deviceList_output, indent=4))
             deviceList = DeviceTemp.objects.filter(user=request.user)
             allProfiles = Profile.objects.filter(user=request.user)
             context = {'deviceList': deviceList,
@@ -385,14 +386,33 @@ def diviceList(request):
         return render(request, 'control/device_list.html',
                       {'allDevices': allDevices, 'allProfiles': allProfiles, 'allConfigs': allConfigs})
 
+# a
+# a
+# a
+# a
+# a
+# a
+# a
+# a
+# a
+# a
+# a
 
 def remove_device(request):
     if not request.user.is_authenticated:
         return redirect('control:login')
     else:
+        NagServerInfo = NagiosServer.objects.filter(user=request.user)
+        server = ''
+        apikey = ''
+        for item in NagServerInfo:
+            server = item.hostname
+            apikey = item.authKey
         form = request.POST
         device_id = form['device_id']
         device = get_object_or_404(Device, pk=device_id)
+        host = host_template(server, device.managementIP, device.hostname, apikey)
+        host.delete_host()
         device.delete()
         return redirect('control:device_list')
 
@@ -884,6 +904,33 @@ def toggle_keepAlive(request, deviceID, interfaceID):
         return JsonResponse({'success': False})
 
 
+def toggle_monitor(request, device_id):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    hostInfo = get_object_or_404(Device, pk=device_id)
+    NagServerInfo = NagiosServer.objects.filter(user=request.user)
+    server = ''
+    apikey = ''
+    for item in NagServerInfo:
+        server = item.hostname
+        apikey = item.authKey
+    host = host_template(server, hostInfo.managementIP, hostInfo.hostname, apikey)
+    if hostInfo.monitored:
+        response = host.delete_host()
+        hostInfo.monitored = False
+        hostInfo.save()
+        return JsonResponse(response,safe=False)
+    else:
+        response = host.add_host()
+        hostInfo.monitored = True
+        hostInfo.save()
+        return JsonResponse(response,safe=False)
+    
+
+    
+
+    
+
 def host_info_API(request):
     if not request.user.is_authenticated:
         return redirect('control:login')
@@ -1000,3 +1047,52 @@ def routingTableAPI(request, device_id):
     response = targetDevice.getRoutingTable()
     # print(json.dumps(response, indent=4))
     return JsonResponse(response,safe=False)
+
+
+def get_inventory(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    tracking = Device.objects.filter(user=request.user, monitored=True)
+    untracked = Device.objects.filter(user=request.user, monitored=False)
+    response = {}
+    numberOfTracking = 0
+    numberOfUntracked = 0
+    for item in tracking:
+        numberOfTracking +=1
+    for item in untracked:
+        numberOfUntracked +=1
+
+    response['tracking'] = numberOfTracking
+    response['untracked'] = numberOfUntracked
+
+    return JsonResponse(response, safe=False)
+
+def overall_device_status(request):
+    if not request.user.is_authenticated:
+        return redirect('control:login')
+    response = {}
+    deviceList = []
+    deviceList_qs = Device.objects.filter(user=request.user, monitored=True).values_list('hostname',)
+    NagServerInfo = NagiosServer.objects.filter(user=request.user)
+    server = ''
+    apikey = ''
+    okCount = 0
+    criticalCount = 0
+    for item in NagServerInfo:
+        server = item.hostname
+        apikey = item.authKey
+    for item in deviceList_qs:
+        deviceList.append(item[0])
+    statusListRequest = get_status(server,apikey)
+    statusList = json.loads(statusListRequest.get_host_status())
+    for item in statusList['hoststatus']:
+        if item['host_name'] in deviceList:
+            output = item['output'].split(' ')[0]
+            if output == 'OK':
+                okCount +=1
+            else:
+                criticalCount +=1
+    response['ok'] = okCount
+    response['critical'] = criticalCount
+    return JsonResponse(response, safe=False)
+    
