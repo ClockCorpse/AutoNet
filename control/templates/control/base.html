@@ -11,11 +11,14 @@
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{% static 'script/chart.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'style/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'DataTables/datatables.min.css' %}"/>
+    <script type="text/javascript" src="{% static 'DataTables/datatables.min.js' %}"></script>
     <!-- <link rel="stylesheet" href="{% static 'style/js/bootstrap.bundle.min.js' %}"> -->
     <link rel="stylesheet" href="{% static 'fontawesome-free-5.15.1-web/css/all.css' %}">
-    <script src="{% static 'style/css/jquery-3.3.1.min.js' %}"></script>
+    <!-- <script src="{% static 'style/css/jquery-3.3.1.min.js' %}"></script> -->
     <link rel="stylesheet" href="{% static 'style/sidebar.css' %}">
     <title>AutoNet: A Network Automation Tool</title>
 </head>
@@ -24,21 +27,9 @@
     <div id="wrapper" class>
         <!-- Sidebar -->
         <div id="sidebar-wrapper">
-            <!-- <div class="brand-wrapper">
-                <a href="#" class="btn" style="color: #ddd; margin-left: -1px; margin-top: 0px;" id="menu-toggle-side">
-                    <i class="fas fa-bars"></i>
-                </a>&nbsp;&nbsp;
-                <a class="brand-sidebar" href="{% url 'control:index' %}">AutoNet</a>
-            </div> -->
             <span class="sidebar-heading">
                 <span><i class="fas fa-tachometer-alt"></i>&nbsp;&nbsp;Dashboard</span>
             </span>
-            <!-- <ul class="sidebar-nav">
-                <span class="sub-heading">Domain Service</span>
-                <li><a href="{% url 'control:DSUserList' %}"><i class="fas fa-user">&nbsp;&nbsp;</i>User</a></li>
-                <li><a href="{% url 'control:addOU' %}"><i class="fas fa-users">&nbsp;&nbsp;</i>Group</a></li>
-                <li><a href="{% url 'control:promoteDomain' %}"><i class="fas fa-arrow-circle-up">&nbsp;&nbsp;</i>Promote Domain</a></li>
-            </ul> -->
             <ul class="sidebar-nav">
                 <span class="sub-heading">Devices</span>
                 <li class="{% block discover_active %}{% endblock %}"><a href="{% url 'control:discover_devices' %}"><i class="fas fa-map">&nbsp;&nbsp;</i>Discover</a></li>
@@ -79,44 +70,15 @@
                         </div>
                     </li>
                 </ul>
-                <!-- <li class="">
-                        <a href="#" style="text-decoration: none;">
-                            <span class="fas fa-sign-out-alt" aria-hidden="true"></span>&nbsp; Logout
-                        </a>
-                    </li> -->
             </div>
         </nav>
-        <!-- Page content -->
-        <!-- <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-3 col-md-4">
-                        <div class="horizontal-card device ">
-                            <div class="horizontal-card-body align-items-center">
-                                <div class="device-info float-left">
-                                    <span class="host-name">Devices</span>
-                                    <p>3</p>
-                                </div>
-                                <div class="device-icon float-right">
-                                    <img src="Server.svg">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        </div> -->
-
         <div id="page-content-wrapper">
             {% block body %} {% endblock %}
         </div>
 
         </div>
 
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
         <script src="{% static 'style/js/bootstrap.bundle.min.js' %}"></script>
-        <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
         <script>
             $("#menu-toggle").click(function(e) {
                 e.preventDefault();

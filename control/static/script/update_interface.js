@@ -3,7 +3,7 @@ function updateInterface(request){
     getInterface = new XMLHttpRequest();
     getInterface.open('GET', request);
     getInterface.onload = function() {
-        document.getElementById('loading').innerHTML = ''
+        // document.getElementById('loading').innerHTML = ''
         var i = 0;
         interfaces = JSON.parse(getInterface.responseText)[0];
         interfacesIP = JSON.parse(getInterface.responseText)[1];

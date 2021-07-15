@@ -1,4 +1,13 @@
 {% extends 'control/base.html' %}{% load static %}{% block deviceList_active %}active{% endblock %}{% block body %}
+<script>
+    $(document).ready(function() {
+        $('#interface_list').DataTable({
+            "language": {
+            "emptyTable": "Loading interfaces..."
+            }
+        });   
+    } );
+</script>
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-4 col-md-3">
@@ -53,7 +62,7 @@
             <div class="card account-info-wrapper">
                 <div class="card-header"><h3 class="card-title">All Interfaces</h3></div>
                 <div class="card-body" style="padding: 20px; overflow-x: scroll !important;">
-                    <table class="table">
+                    <table id="interface_list" class="table">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -68,7 +77,6 @@
                         <tbody id='table_body'>
                         </tbody>
                     </table>
-                    <div id="loading" style="width: inherit;"><div class="row justify-content-center"><div class="lds-dual-ring"></div></div></div>
                 </div>
                 <!-- <div class="card-footer" style="padding: 20px;"> -->
                 <div class="card-footer row" style="margin:auto 0px">

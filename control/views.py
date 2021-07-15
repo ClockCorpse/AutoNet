@@ -1076,7 +1076,9 @@ def overall_device_status(request):
     NagServerInfo = NagiosServer.objects.filter(user=request.user)
     server = ''
     apikey = ''
+    statusDetail={}
     okCount = 0
+    warningCount = 0
     criticalCount = 0
     for item in NagServerInfo:
         server = item.hostname
@@ -1087,12 +1089,21 @@ def overall_device_status(request):
     statusList = json.loads(statusListRequest.get_host_status())
     for item in statusList['hoststatus']:
         if item['host_name'] in deviceList:
+            statusDetail[item['host_name']]={}
+            statusDetail[item['host_name']]['output'] = item['output']
+            statusDetail[item['host_name']]['last_check'] = item['last_check']
             output = item['output'].split(' ')[0]
             if output == 'OK':
                 okCount +=1
+            elif output == 'WARNING':
+                warningCount +=1
             else:
                 criticalCount +=1
-    response['ok'] = okCount
-    response['critical'] = criticalCount
+    response['overall']={}
+    response['status_detail']={}
+    response['status_detail'] = statusDetail
+    response['overall']['ok'] = okCount
+    response['overall']['warning'] = warningCount
+    response['overall']['critical'] = criticalCount
     return JsonResponse(response, safe=False)
     

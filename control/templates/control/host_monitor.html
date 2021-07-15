@@ -35,12 +35,26 @@
                 <div class="card-body tab-content" style="padding: 20px; height: 500px; overflow-x: scroll !important; overflow-y: scroll;">
                     <div class="tab-pane fade show active" id="inventory" role="tabpanel">
                         <h3>Inventory</h3>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <canvas id="devices" width="400" height="400"></canvas>
+                        <div class="row" style="margin-top:20px;">
+                            <div class="col-md-4" style="margin-top: 20px auto;">
+                                <div class="col-md-6">
+                                    <canvas id="devices" width="300" height="300"></canvas>
+                                </div>
+                                <div class="col-md-6" style="margin-top: 20px;">
+                                    <canvas id="status" width="300" height="300"></canvas>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <canvas id="status" width="400" height="400"></canvas>
+                            <div class="col-md-8">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <th>Host</th>
+                                        <th>Status Information</th>
+                                        <th>Last Check</th>
+                                    </thead>
+                                    <tbody id='status_table_body'>
+                                        
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -49,7 +63,7 @@
                         <div class="chart-container">
                             <canvas id="resource" width="650" height="200"></canvas>
                         </div>
-                        <div class="row">
+                        <div class="row" style="margin-top:20px;">
                             <div class="row col-sm-4 col-md-6">
                                 <div class="col-md-1"></div>
                                 <div class="col-sm-2 col-md-5">

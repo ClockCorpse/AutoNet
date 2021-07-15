@@ -1,4 +1,9 @@
 {% extends 'control/base.html' %}{% block deviceList_active %}active{% endblock %}{% block body %}
+<script>
+    $(document).ready(function() {
+        $('#device_list').DataTable();
+    } );
+</script>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-sm-12 col-md-9">
@@ -7,11 +12,10 @@
                     <h4 class="title">Device List</h4>
                 </div>
                 <div class="card-body">
-                    <table class="table">
+                    <table id="device_list" class="table" style="width:100%; padding-top: 10px; padding-bottom: 10px;">
                         <thead>
                             <th>Name</th>
                             <th>Management IP</th>
-                            <th>Status</th>
                             <th>Capabilities</th>
                             <th></th>
                         </thead>
@@ -19,7 +23,6 @@
                         <tr>
                             <td><a href="{% url 'control:device_detail' device.id %}">{{device.hostname}}</a></td>
                             <td>{{device.managementIP}}</td>
-                            <td>{{device.status}}</td>
                             <td>{{device.capabilities}}</td>
                             <td>
                                 <form action="{% url 'control:remove_device' %}" method="POST">
@@ -96,4 +99,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

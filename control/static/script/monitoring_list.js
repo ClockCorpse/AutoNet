@@ -23,8 +23,13 @@ var inventory = new Chart(ctx, {
   options: {
    	//cutoutPercentage: 40,
     responsive: false,
-
-  }
+    plugins: {
+      legend: {
+          display: true,
+          position: 'bottom'
+      }
+    }
+  },
 });
 
 var updateInventory = function(tracking,untracked){
