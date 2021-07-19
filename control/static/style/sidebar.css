@@ -79,6 +79,15 @@ body {
     color: #fff;
 }
 
+.login-brand{
+    height: 25%;
+    text-align: center;
+    color: #2c3e50;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 35px;
+}
+
 .brand-wrapper {
     height: 40px;
     margin: 20px;
@@ -312,6 +321,19 @@ body {
     color: #ddd !important;
 }
 
+.logo-container{
+    margin-top: 25%;
+    margin-bottom: 5%;
+    height: 25%;
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    background-position: center;
+}
+
+.login-input{
+    border:none;
+}
+
 .account-info-wrapper {
     margin-top: 75px;
     border-radius: 10px;
@@ -319,7 +341,6 @@ body {
 }
 
 .login-wrapper {
-    margin-top: 75px;
     border-radius: 10px;
 }
 

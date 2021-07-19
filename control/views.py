@@ -386,17 +386,6 @@ def diviceList(request):
         return render(request, 'control/device_list.html',
                       {'allDevices': allDevices, 'allProfiles': allProfiles, 'allConfigs': allConfigs})
 
-# a
-# a
-# a
-# a
-# a
-# a
-# a
-# a
-# a
-# a
-# a
 
 def remove_device(request):
     if not request.user.is_authenticated:
